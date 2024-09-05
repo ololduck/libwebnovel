@@ -8,6 +8,9 @@ version = "0.1.1"
 edition = "2021"
 license-file = "LICENSE"
 readme = "README.md"
+exclude = [
+    "release.sh"
+]
 
 [features]
 default = ["royalroad"]
