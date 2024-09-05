@@ -31,7 +31,7 @@ pub enum BackendError {
     /// We got an HTTP404 on the given URL :p
     #[error("the given url could not be found")]
     UrlNotFound,
-    /// Used when [reqwest::Response::status()] returns something else than
+    /// Used when [`reqwest::Response::status()`] returns something else than
     /// success
     #[error("We could not access the fiction page: {0}")]
     RequestFailed(String),
@@ -75,7 +75,7 @@ where
     fn get_chapter_count(&self) -> Result<u32, BackendError>;
 
     /// Returns all chapters for this fiction. The default implementation simply
-    /// calls [fn.get_chapter] repeatedly
+    /// calls [`Self::get_chapter`] repeatedly
     fn get_chapters(&self) -> Result<Vec<Chapter>, BackendError> {
         let mut chapters = Vec::new();
         for i in 1..self.get_chapter_count()? {
@@ -87,7 +87,7 @@ where
 }
 
 /// Enum listing all available backends. A new backend may be constructed using
-/// [Backends::new(url)].
+/// [`Backends::new`].
 #[derive(EnumCount, EnumIter, Debug, Default)]
 pub enum Backends {
     /// A dumb backend that should never be constructed, but is necessary for
@@ -152,7 +152,7 @@ impl Backend for Backends {
         Err(BackendError::NoMatchingBackendFound(url.to_string()))
     }
 
-    /// Returns the title of the webnovel. See [Backends::new()] for an example.
+    /// Returns the title of the webnovel. See [`Backends::new`] for an example.
     fn title(&self) -> Result<String, BackendError> {
         match self {
             Backends::Dumb => {

@@ -15,7 +15,7 @@ const CHAPTER_PAGE_TITLE_SELECTOR: &str = "div.row.fic-header div.row div h1.fon
 const CHAPTER_PAGE_CONTENT: &str =
     "div.page-container div.page-content-wrapper div.page-content div.container.chapter-page div div div.portlet-body div.chapter-inner.chapter-content";
 
-/// A [Backend] implementation for [RoyalRoad](https://royalroad.com)
+/// A [`Backend`] implementation for [RoyalRoad](https://royalroad.com)
 #[derive(Debug)]
 pub struct RoyalRoad {
     url: String,

@@ -1,4 +1,10 @@
-#![deny(missing_docs)]
+#![deny(
+    missing_docs,
+    rustdoc::broken_intra_doc_links,
+    rustdoc::private_intra_doc_links,
+    rustdoc::bare_urls
+)]
+#![warn(rustdoc::unescaped_backticks)]
 //!![docs.rs](https://img.shields.io/docsrs/libwebnovel)
 //!
 //! This crate deals with webnovels. You can see it as a way to access different
@@ -38,6 +44,22 @@
 //! }
 //! ```
 //!
+//! ## Cargo features
+//!
+//! Each available backend matches a [cargo `feature`](https://doc.rust-lang.org/cargo/reference/features.html) that can be enabled or
+//! disabled.
+//!
+//! By default, only the *royalroad* and *freewebnovel* are enabled. *libread*
+//! is disabled by default since (in my meager experience) it is simply a
+//! different frontend for *freewebnovel*.
+//!
+//! if you want all features, including the default ones:
+//! ```toml
+//! # Cargo.toml
+//! [dependencies]
+//! libwebnovel = {version="*", features = ["all"]}
+//! ```
+//!
 //! ## TODO
 //!
 //! - [ ] Find a way to handle something other than text content:
@@ -45,8 +67,15 @@
 //!   - [ ] tables
 //!   - [ ] chapter headers ?
 //!   - [ ] chapter footers ?
-//! - [ ] Add more backends, such as libread.
-//! - [ ] create a binary
+//! - [ ] Add more backends:
+//!   - [x] libread
+//!   - [x] freewebnovel
+//!   - [x] royalroad
+//!   - [ ] suggestions?
+//! - [ ] implement an `async` version to get a better throughput. May be
+//!   important for images?
+//! - [ ] create a binary using this lib to save webnovels to disk. It may also
+//!   serve as a sample implementation?
 
 use chrono::{DateTime, Utc};
 use getset::{CopyGetters, Getters, Setters};

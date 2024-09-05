@@ -5,7 +5,7 @@ use crate::backends::{freewebnovel, Backend, BackendError};
 use crate::utils::get;
 use crate::Chapter;
 
-/// A backend using [libread](https://libread.com). Honestly i don't know why i bothered with it, since i'm under the impression that most chapters redirect to Freewebnovel
+/// A backend using [libread](https://libread.com). Honestly i don't know why i bothered with it, since i'm under the impression that most chapters redirect to [FreeWebNovel](https://freewebnovel.com).
 #[derive(Debug)]
 pub struct LibRead {
     url: String,
@@ -58,7 +58,7 @@ impl Backend for LibRead {
         })
     }
 
-    /// Title of the fiction. See [Libread::new()] for docs.
+    /// Title of the fiction. See [`LibRead::new`] for docs.
     fn title(&self) -> Result<String, BackendError> {
         freewebnovel::title(&self.page)
     }

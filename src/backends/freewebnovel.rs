@@ -13,7 +13,7 @@ pub(crate) const CHAPTER_LIST_SELECTOR: &str = "div.m-newest2 ul#idData li a.con
 const CHAPTER_TITLE_SELECTOR: &str = "div.top span.chapter";
 const CHAPTER_CONTENT_SELECTOR: &str = "div.txt div#article";
 
-/// An implementation of backend for https://freewebnovel.com
+/// An implementation of backend for [FreeWebNovel](https://freewebnovel.com)
 #[derive(Debug)]
 pub struct FreeWebNovel {
     url: String,
@@ -65,7 +65,7 @@ impl Backend for FreeWebNovel {
         })
     }
 
-    /// Title of the fiction. See [FreeWebNovel::new()] for docs.
+    /// Title of the fiction. See [`FreeWebNovel::new`] for usage.
     fn title(&self) -> Result<String, BackendError> {
         title(&self.page)
     }

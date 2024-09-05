@@ -36,6 +36,22 @@ fn write_chapters_to_epub(writer: &impl Write, chapters: &[Chapter]) -> Result<(
 }
 ```
 
+### Cargo features
+
+Each available backend matches a [cargo `feature`](https://doc.rust-lang.org/cargo/reference/features.html) that can be enabled or
+disabled.
+
+By default, only the *royalroad* and *freewebnovel* are enabled. *libread*
+is disabled by default since (in my meager experience) it is simply a
+different frontend for *freewebnovel*.
+
+if you want all features, including the default ones:
+```toml
+# Cargo.toml
+[dependencies]
+libwebnovel = {version="*", features = ["all"]}
+```
+
 ### TODO
 
 - [ ] Find a way to handle something other than text content:
@@ -43,5 +59,12 @@ fn write_chapters_to_epub(writer: &impl Write, chapters: &[Chapter]) -> Result<(
   - [ ] tables
   - [ ] chapter headers ?
   - [ ] chapter footers ?
-- [ ] Add more backends, such as libread.
-- [ ] create a binary
+- [ ] Add more backends:
+  - [x] libread
+  - [x] freewebnovel
+  - [x] royalroad
+  - [ ] suggestions?
+- [ ] implement an `async` version to get a better throughput. May be
+  important for images?
+- [ ] create a binary using this lib to save webnovels to disk. It may also
+  serve as a sample implementation?
