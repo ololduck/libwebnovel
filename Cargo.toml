@@ -1,0 +1,23 @@
+[package]
+name = "libwebnovel"
+description = "A Rust crate enabling users to get chapters of a webnovel, with multiple available backends."
+authors = ["Paul Ollivier <contact@paulollivier.fr>"]
+version = "0.1.0"
+edition = "2021"
+license-file = "LICENSE"
+
+[features]
+default = ["royalroad"]
+all = ["royalroad", "libread"]
+royalroad = ["dep:reqwest", "dep:scraper"]
+libread = ["dep:reqwest", "dep:scraper"]
+
+[dependencies]
+thiserror = { version = "1.0.63" }
+regex = "1.10.6"
+getset = { version = "0.1.2" }
+chrono = "0.4.38"
+log = "0.4.22"
+strum = { version = "0.26.3", features = ["derive"] }
+reqwest = { version = "0.12.7", features = ["blocking"], optional = true }
+scraper = { version = "0.20.0", optional = true }
