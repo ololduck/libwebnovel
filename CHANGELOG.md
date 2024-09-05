@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## v0.1.1 (2024-09-05)
 
+<csr-id-51636dcfc7821047a13dc386d35ae3e9a93e2f39/>
+
 ### Chore
 
  - <csr-id-51636dcfc7821047a13dc386d35ae3e9a93e2f39/> bump version
@@ -18,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### New Features
 
  - <csr-id-f4d612e6d4fd843fcdd17397a254e07e1eda1020/> add release script
+ - <csr-id-7f68a5ad056b4f31c4d1c101d67319c4b89bb807/> add release script
 
 ### Bug Fixes
 
@@ -38,7 +41,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <details><summary>view details</summary>
 
  * **Uncategorized**
-    - Add release script (f4d612e)
+    - Add release script (7f68a5a)
     - Bump version (51636dc)
     - Fix default Backend::get_chapters() implementation (f9307d2)
     - Cleanup (12d1a5a)
