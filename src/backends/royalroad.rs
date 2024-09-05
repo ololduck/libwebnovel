@@ -1,10 +1,10 @@
 use chrono::DateTime;
 use log::debug;
 use regex::Regex;
-use reqwest::blocking::get;
 use scraper::{Html, Selector};
 
 use crate::backends::{Backend, BackendError};
+use crate::utils::get;
 use crate::Chapter;
 
 const CHAPTER_TITLE_SELECTOR: &str = "table#chapters tbody tr.chapter-row td:first-child a";

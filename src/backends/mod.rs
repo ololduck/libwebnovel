@@ -1,16 +1,23 @@
+use std::fmt::Debug;
+
 use regex::Regex;
 use strum::{EnumCount, EnumIter, IntoEnumIterator};
 
+#[cfg(feature = "freewebnovel")]
+pub use crate::backends::freewebnovel::FreeWebNovel;
 #[cfg(feature = "libread")]
-use crate::backends::libread::LibRead;
+pub use crate::backends::libread::LibRead;
 #[cfg(feature = "royalroad")]
-use crate::backends::royalroad::RoyalRoad;
+pub use crate::backends::royalroad::RoyalRoad;
 use crate::Chapter;
 
 #[cfg(feature = "libread")]
 mod libread;
 #[cfg(feature = "royalroad")]
 mod royalroad;
+
+#[cfg(feature = "freewebnovel")]
+mod freewebnovel;
 
 /// An error that may be returned when the backend encounters an error
 #[derive(thiserror::Error, Debug)]
@@ -42,9 +49,9 @@ pub enum BackendError {
 /// Must be implemented by each backend.
 ///
 /// ## How to implement a new backend ?
-/// There are multiple way to do this, but basically, you only need to implement
-/// the methods defined by this trait.
-pub trait Backend
+/// There are multiple ways to do this, but basically, you only need to
+/// implement the methods defined by this trait.
+pub trait Backend: Default + Debug
 where
     Self: Sized,
 {
@@ -93,6 +100,9 @@ pub enum Backends {
     #[cfg(feature = "libread")]
     /// A LibRead backend
     LibRead(LibRead),
+    #[cfg(feature = "freewebnovel")]
+    /// A FreeWebNovel backend
+    FreeWebNovel(FreeWebNovel),
 }
 
 impl Backends {
@@ -103,6 +113,8 @@ impl Backends {
             Backends::RoyalRoad(_) => Ok(Self::RoyalRoad(RoyalRoad::new(url)?)),
             #[cfg(feature = "libread")]
             Backends::LibRead(_) => Ok(Self::LibRead(LibRead::new(url)?)),
+            #[cfg(feature = "freewebnovel")]
+            Backends::FreeWebNovel(_) => Ok(Self::FreeWebNovel(FreeWebNovel::new(url)?)),
         }
     }
 }
@@ -115,6 +127,8 @@ impl Backends {
             Backends::RoyalRoad(_) => RoyalRoad::get_backend_regexps(),
             #[cfg(feature = "libread")]
             Backends::LibRead(_) => LibRead::get_backend_regexps(),
+            #[cfg(feature = "freewebnovel")]
+            Backends::FreeWebNovel(_) => FreeWebNovel::get_backend_regexps(),
         }
     }
 }
@@ -148,6 +162,8 @@ impl Backend for Backends {
             Backends::RoyalRoad(b) => b.title(),
             #[cfg(feature = "libread")]
             Backends::LibRead(b) => b.title(),
+            #[cfg(feature = "freewebnovel")]
+            Backends::FreeWebNovel(b) => b.title(),
         }
     }
 
@@ -170,6 +186,8 @@ impl Backend for Backends {
             Backends::RoyalRoad(b) => b.url(),
             #[cfg(feature = "libread")]
             Backends::LibRead(b) => b.url(),
+            #[cfg(feature = "freewebnovel")]
+            Backends::FreeWebNovel(b) => b.url(),
         }
     }
 
@@ -192,6 +210,8 @@ impl Backend for Backends {
             Backends::RoyalRoad(b) => b.get_authors(),
             #[cfg(feature = "libread")]
             Backends::LibRead(b) => b.get_authors(),
+            #[cfg(feature = "freewebnovel")]
+            Backends::FreeWebNovel(b) => b.get_authors(),
         }
     }
 
@@ -226,6 +246,8 @@ impl Backend for Backends {
             Backends::RoyalRoad(b) => b.get_chapter(chapter_number),
             #[cfg(feature = "libread")]
             Backends::LibRead(b) => b.get_chapter(chapter_number),
+            #[cfg(feature = "freewebnovel")]
+            Backends::FreeWebNovel(b) => b.get_chapter(chapter_number),
         }
     }
 
@@ -245,6 +267,8 @@ impl Backend for Backends {
             Backends::RoyalRoad(b) => b.get_chapter_count(),
             #[cfg(feature = "libread")]
             Backends::LibRead(b) => b.get_chapter_count(),
+            #[cfg(feature = "freewebnovel")]
+            Backends::FreeWebNovel(b) => b.get_chapter_count(),
         }
     }
 }

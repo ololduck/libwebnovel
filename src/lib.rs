@@ -41,10 +41,10 @@
 //! ## TODO
 //!
 //! - [ ] Find a way to handle something other than text content:
-//!  - [ ] images
-//!  - [ ] tables
-//!  - [ ] chapter headers ?
-//!  - [ ] chapter footers ?
+//!   - [ ] images
+//!   - [ ] tables
+//!   - [ ] chapter headers ?
+//!   - [ ] chapter footers ?
 //! - [ ] Add more backends, such as libread.
 //! - [ ] create a binary
 
@@ -68,3 +68,5 @@ pub struct Chapter {
 /// implementations of backends
 pub mod backends;
 pub use backends::{Backend, Backends};
+
+pub(crate) mod utils;

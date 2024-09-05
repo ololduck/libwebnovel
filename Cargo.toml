@@ -4,7 +4,7 @@ description = "A Rust crate enabling users to get chapters of a webnovel, with m
 homepage = "https://codeberg.org/paulollivier/libwebnovel"
 repository = "https://codeberg.org/paulollivier/libwebnovel"
 authors = ["Paul Ollivier <contact@paulollivier.fr>"]
-version = "0.1.1"
+version = "0.2.0"
 edition = "2021"
 license-file = "LICENSE"
 readme = "README.md"
@@ -13,10 +13,11 @@ exclude = [
 ]
 
 [features]
-default = ["royalroad"]
-all = ["royalroad", "libread"]
+default = ["all"]
+all = ["royalroad", "freewebnovel"]
 royalroad = ["dep:reqwest", "dep:scraper"]
-libread = ["dep:reqwest", "dep:scraper"]
+freewebnovel = ["dep:reqwest", "dep:scraper"]
+libread = ["freewebnovel"]
 
 [dependencies]
 thiserror = { version = "1.0.63" }

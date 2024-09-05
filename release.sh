@@ -4,5 +4,6 @@ set -e
 cargo test
 cargo clippy -r --all-targets --locked
 cargo semver-checks check-release --all-features
-cargo smart-release --execute --update-crate-index
+cargo readme >README.md && git add README.md
+cargo smart-release --execute --update-crates-index
 git push
