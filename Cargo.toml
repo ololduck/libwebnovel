@@ -1,10 +1,13 @@
 [package]
 name = "libwebnovel"
 description = "A Rust crate enabling users to get chapters of a webnovel, with multiple available backends."
+homepage = "https://codeberg.org/paulollivier/libwebnovel"
+repository = "https://codeberg.org/paulollivier/libwebnovel"
 authors = ["Paul Ollivier <contact@paulollivier.fr>"]
 version = "0.1.0"
 edition = "2021"
 license-file = "LICENSE"
+readme = "README.md"
 
 [features]
 default = ["royalroad"]

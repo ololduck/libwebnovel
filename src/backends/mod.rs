@@ -40,6 +40,9 @@ pub enum BackendError {
 }
 
 /// Must be implemented by each backend.
+///
+/// ## How to implement a new backend ?
+/// There are multiple way to do this, but basically, you only need to implement the methods defined by this trait.
 pub trait Backend
 where
     Self: Sized,

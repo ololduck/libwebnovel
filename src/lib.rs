@@ -36,7 +36,7 @@ fn write_chapters_to_epub(writer: &impl Write, chapters: &[Chapter]) -> Result<(
 
 ## TODO
 
-- [ ] Find a way to handle something other than content:
+- [ ] Find a way to handle something other than text content:
   - [ ] images
   - [ ] tables
   - [ ] chapter headers ?
