@@ -71,7 +71,7 @@ where
     /// calls [fn.get_chapter] repeatedly
     fn get_chapters(&self) -> Result<Vec<Chapter>, BackendError> {
         let mut chapters = Vec::new();
-        for i in 0..self.get_chapter_count()? {
+        for i in 1..self.get_chapter_count()? {
             let chapter = self.get_chapter(i)?;
             chapters.push(chapter);
         }
