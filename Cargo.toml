@@ -12,6 +12,9 @@ exclude = [
     "release.sh"
 ]
 
+[package.metadata.docs.rs]
+all-features = true
+
 [features]
 default = ["all"]
 all = ["royalroad", "freewebnovel"]
