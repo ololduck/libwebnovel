@@ -1,5 +1,7 @@
 # libwebnovel
 
+![docs.rs](https://img.shields.io/docsrs/libwebnovel)
+
 This crate deals with webnovels. You can see it as a way to access different
 webnovel hosting sites and be able to get their contents.
 
@@ -21,7 +23,7 @@ fn main() {
     let mut f = File::create(&epub_path).unwrap();
     write_chapters_to_epub(&mut f, &chapters).unwrap();
 
-    // Since this code example also serves as sortof an integration test, remove the created file :p
+    // Since this code example also sort of serves as an integration test, remove the created file :p
     std::fs::remove_file(epub_path).unwrap();
 }
 
@@ -33,7 +35,7 @@ fn write_chapters_to_epub(writer: &impl Write, chapters: &[Chapter]) -> Result<(
 
 ### TODO
 
-- [ ] Find a way to handle something other than content:
+- [ ] Find a way to handle something other than text content:
   - [ ] images
   - [ ] tables
   - [ ] chapter headers ?

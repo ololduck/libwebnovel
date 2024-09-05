@@ -1,5 +1,7 @@
 #![deny(missing_docs)]
 /*!
+![docs.rs](https://img.shields.io/docsrs/libwebnovel)
+
 This crate deals with webnovels. You can see it as a way to access different
 webnovel hosting sites and be able to get their contents.
 
@@ -44,33 +46,9 @@ fn write_chapters_to_epub(writer: &impl Write, chapters: &[Chapter]) -> Result<(
 - [ ] Add more backends, such as libread.
 - [ ] create a binary
 */
-use std::io::{Read, Write};
-use std::path::PathBuf;
 
 use chrono::{DateTime, Utc};
 use getset::{CopyGetters, Getters, Setters};
-
-/// Represents an error that can happen when accessing storage
-#[derive(thiserror::Error, Debug)]
-pub enum StorageError {
-    /// represents an io error, with the underlying error
-    #[error("Input/Output error")]
-    IoError(#[from] std::io::Error),
-}
-
-/// Something that can be stored on disk
-pub trait Storable {
-    /// An error type that can be returned for storage operations
-    type Error;
-    /// Lets the implementor decide where to store stuff
-    fn filename(&self) -> PathBuf;
-    /// Lets the implementor decide how to load stored stuff
-    fn load(reader: &impl Read) -> Result<Self, StorageError>
-    where
-        Self: Sized;
-    /// Lets the implementor decide how to store stuff
-    fn store(&self, writer: &impl Write) -> Result<(), StorageError>;
-}
 
 /// A chapter of a webnovel
 #[derive(Debug, Getters, Setters, CopyGetters, Default)]
