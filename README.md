@@ -5,6 +5,9 @@
 This crate deals with webnovels. You can see it as a way to access different
 webnovel hosting sites and be able to get their contents.
 
+Since there are times we don't have Internet access, such as when riding
+some trains, downloading to disk in a convenient format seems the way to go.
+
 ### Example
 Say you want to create a software that will generate epubs from a given
 fiction url. This could be expressed by something like the following:
@@ -36,9 +39,9 @@ fn write_chapters_to_epub(writer: &impl Write, chapters: &[Chapter]) -> Result<(
 ### TODO
 
 - [ ] Find a way to handle something other than text content:
-  - [ ] images
-  - [ ] tables
-  - [ ] chapter headers ?
-  - [ ] chapter footers ?
+ - [ ] images
+ - [ ] tables
+ - [ ] chapter headers ?
+ - [ ] chapter footers ?
 - [ ] Add more backends, such as libread.
 - [ ] create a binary
