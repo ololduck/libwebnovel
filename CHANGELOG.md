@@ -5,7 +5,48 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.3.0 (2024-09-06)
+
+### Documentation
+
+ - <csr-id-16e3a0b5a0d8478ade2a3e2de43b9d850d052e51/> include all features on docs generation
+ - <csr-id-d5c35c9611482385221bd21f9a5e759b133537ed/> add more lints & fix missing intra links
+
+### New Features
+
+ - <csr-id-e7a5a934be10e0b0be5e8cba767d5845a33bb07d/> Add chapter ordering with function provided by backends
+   This enables multiple things:
+   - ordering the chapters (obvy);
+   - saving the chapters on disk & later merging with online chapters and
+     still being able to order them, for instance chronologically;
+   
+   I think this feature will still require some work, as i'm not sure it's
+   convenient enough to use. Moreover, we still use the chapter index in
+   the chapter list to deterime its index.
+
+### Commit Statistics
+
+<csr-read-only-do-not-edit/>
+
+ - 3 commits contributed to the release.
+ - 3 commits were understood as [conventional](https://www.conventionalcommits.org).
+ - 0 issues like '(#ID)' were seen in commit messages
+
+### Commit Details
+
+<csr-read-only-do-not-edit/>
+
+<details><summary>view details</summary>
+
+ * **Uncategorized**
+    - Add chapter ordering with function provided by backends (e7a5a93)
+    - Include all features on docs generation (16e3a0b)
+    - Add more lints & fix missing intra links (d5c35c9)
+</details>
+
 ## v0.2.0 (2024-09-05)
+
+<csr-id-51636dcfc7821047a13dc386d35ae3e9a93e2f39/>
 
 ### Chore
 
@@ -29,7 +70,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <csr-read-only-do-not-edit/>
 
- - 11 commits contributed to the release.
+ - 12 commits contributed to the release.
  - 6 commits were understood as [conventional](https://www.conventionalcommits.org).
  - 0 issues like '(#ID)' were seen in commit messages
 
@@ -40,6 +81,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <details><summary>view details</summary>
 
  * **Uncategorized**
+    - Release libwebnovel v0.2.0 (4371836)
     - Add freewebnovel and fix libread (9e8018d)
     - Add smart-release & git push to release script (f0f960f)
     - Release libwebnovel v0.1.1 (eac14d7)
