@@ -6,7 +6,7 @@ repository = "https://codeberg.org/paulollivier/libwebnovel"
 authors = ["Paul Ollivier <contact@paulollivier.fr>"]
 version = "0.3.0"
 edition = "2021"
-license = "AGPL-3"
+license = "AGPL-3.0-or-later"
 readme = "README.md"
 exclude = [
     "release.sh"
