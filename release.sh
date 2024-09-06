@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
-# TODO: add git branch check
+if [[ "$(git branch --list | grep '*' | cut -d' ' -f2)" != "main" ]]; then
+  echo "ERROR: please run this script on the \`main\` branch"
+  exit 1
+fi
 cargo test --all-features
 cargo doc --no-deps -r --all-features
 cargo clippy -r --all-targets --all-features --locked

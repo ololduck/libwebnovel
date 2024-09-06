@@ -3,7 +3,7 @@ use regex::Regex;
 use reqwest::IntoUrl;
 use scraper::{Html, Selector};
 
-use crate::backends::BackendError;
+use crate::backends::{BackendError, ChapterOrderingFn};
 use crate::utils::get;
 use crate::{Backend, Chapter};
 
@@ -38,6 +38,57 @@ impl Default for FreeWebNovel {
 /// );
 /// ```
 impl Backend for FreeWebNovel {
+    fn get_backend_regexps() -> Vec<Regex> {
+        vec![Regex::new(r"https?://freewebnovel\.com/[\w-]+\.html").unwrap()]
+    }
+
+    fn get_backend_name() -> &'static str {
+        "freewebnovel"
+    }
+
+    /// returns a function capable of comparing two chapters
+    /// ```rust
+    /// use libwebnovel::backends::FreeWebNovel;
+    /// use libwebnovel::Backend;
+    /// let backend =
+    ///     FreeWebNovel::new("https://freewebnovel.com/the-guide-to-conquering-earthlings.html")
+    ///         .unwrap();
+    /// let mut chapters = vec![
+    ///     backend.get_chapter(2).unwrap(),
+    ///     backend.get_chapter(1).unwrap(),
+    ///     backend.get_chapter(4).unwrap(),
+    ///     backend.get_chapter(3).unwrap(),
+    /// ];
+    /// chapters.sort_by(FreeWebNovel::get_ordering_function());
+    /// assert_eq!(chapters[0].title(), &Some("Chapter 1: 01".to_string()));
+    /// assert_eq!(chapters[1].title(), &Some("Chapter 2: The 02".to_string()));
+    /// assert_eq!(chapters[2].title(), &Some("Chapter 3: 03".to_string()));
+    /// assert_eq!(chapters[3].title(), &Some("Chapter 4: 04".to_string()));
+    /// ```
+    fn get_ordering_function() -> ChapterOrderingFn {
+        fn parse_chapter_id(chapter_title: &str) -> Option<u32> {
+            let re = Regex::new(r"Chapter (\d+)").unwrap();
+            re.captures(chapter_title)
+                .and_then(|caps| caps.get(1))
+                .and_then(|cap| cap.as_str().parse::<u32>().ok())
+        }
+
+        Box::new(|c1: &Chapter, c2: &Chapter| {
+            // parse the chapter title & extract the chapter number
+            let chapter_number_1 = c1
+                .title()
+                .clone()
+                .and_then(|title| parse_chapter_id(title.as_str()));
+
+            let chapter_number_2 = c2
+                .title()
+                .clone()
+                .and_then(|title| parse_chapter_id(title.as_str()));
+
+            chapter_number_1.cmp(&chapter_number_2)
+        })
+    }
+
     /// Creates a new FreeWebNovel backend from the given URL
     /// ```rust
     /// use libwebnovel::backends::FreeWebNovel;
@@ -102,14 +153,6 @@ impl Backend for FreeWebNovel {
         authors(&self.page)
     }
 
-    fn get_backend_regexps() -> Vec<Regex> {
-        vec![Regex::new(r"https?://freewebnovel\.com/[\w-]+\.html").unwrap()]
-    }
-
-    fn get_backend_name() -> &'static str {
-        "freewebnovel"
-    }
-
     /// returns a chapter
     /// ```rust
     /// use libwebnovel::backends::FreeWebNovel;
@@ -134,9 +177,9 @@ impl Backend for FreeWebNovel {
             .nth(chapter_number as usize - 1)
             .ok_or(BackendError::UnknownChapter(chapter_number))?;
         let chapter_url = format!("https://freewebnovel.com{}", chapter_url);
-        println!("{:?}", chapter_url);
         let mut chapter = get_chapter(chapter_url)?;
         chapter.index = chapter_number;
+        chapter.fiction_url = self.url.clone();
         Ok(chapter)
     }
 
@@ -155,7 +198,8 @@ impl Backend for FreeWebNovel {
 }
 
 pub(crate) fn get_chapter(url: impl IntoUrl) -> Result<Chapter, BackendError> {
-    let resp = get(url)?;
+    let url_str = url.into_url()?.to_string();
+    let resp = get(&url_str)?;
     let page = Html::parse_document(&resp.text()?);
     let title_selector = Selector::parse(CHAPTER_TITLE_SELECTOR).unwrap();
     let content_selector = Selector::parse(CHAPTER_CONTENT_SELECTOR).unwrap();
@@ -165,7 +209,10 @@ pub(crate) fn get_chapter(url: impl IntoUrl) -> Result<Chapter, BackendError> {
         index: 0,
         title: Some(chapter_title),
         content: chapter_content,
+        chapter_url: url_str,
+        fiction_url: "".to_string(),
         published_at: None,
+        metadata: Default::default(),
     })
 }
 pub(crate) fn title(page: &Html) -> Result<String, BackendError> {

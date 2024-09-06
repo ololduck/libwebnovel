@@ -1,9 +1,11 @@
+use std::collections::HashMap;
+
 use chrono::DateTime;
 use log::debug;
 use regex::Regex;
 use scraper::{Html, Selector};
 
-use crate::backends::{Backend, BackendError};
+use crate::backends::{Backend, BackendError, ChapterOrderingFn};
 use crate::utils::get;
 use crate::Chapter;
 
@@ -30,7 +32,58 @@ impl Default for RoyalRoad {
     }
 }
 
+/// Builds a new RoyalRoad backend for a given URL.
+/// ```
+/// use libwebnovel::backends::RoyalRoad;
+/// use libwebnovel::Backend;
+/// let backend =
+///     RoyalRoad::new("https://www.royalroad.com/fiction/21220/mother-of-learning").unwrap();
+/// assert_eq!(backend.title().unwrap(), "Mother of Learning");
+/// ```
 impl Backend for RoyalRoad {
+    fn get_backend_regexps() -> Vec<Regex> {
+        vec![Regex::new(
+            r"https?://www\.royalroad\.com/fiction/(?<fiction_id>\d+)/(?<fiction_title_slug>\w+)",
+        )
+        .unwrap()]
+    }
+
+    fn get_backend_name() -> &'static str {
+        "royalroad"
+    }
+
+    /// Returns a function capable of comparing two chapters
+    ///
+    /// ```rust
+    /// use libwebnovel::backends::RoyalRoad;
+    /// use libwebnovel::Backend;
+    /// let backend =
+    ///     RoyalRoad::new("https://www.royalroad.com/fiction/21220/mother-of-learning").unwrap();
+    /// let mut chapters = vec![
+    ///     backend.get_chapter(2).unwrap(),
+    ///     backend.get_chapter(1).unwrap(),
+    ///     backend.get_chapter(4).unwrap(),
+    ///     backend.get_chapter(3).unwrap(),
+    /// ];
+    /// chapters.sort_by(RoyalRoad::get_ordering_function());
+    /// assert_eq!(
+    ///     chapters[0].title(),
+    ///     &Some("1. Good Morning Brother".to_string())
+    /// );
+    /// assert_eq!(
+    ///     chapters[1].title(),
+    ///     &Some("2. Life’s Little Problems".to_string())
+    /// );
+    /// assert_eq!(
+    ///     chapters[2].title(),
+    ///     &Some("3. The Bitter Truth".to_string())
+    /// );
+    /// assert_eq!(chapters[3].title(), &Some("4. Stars Fell".to_string()));
+    /// ```
+    fn get_ordering_function() -> ChapterOrderingFn {
+        Box::new(|c1: &Chapter, c2: &Chapter| c1.published_at().cmp(c2.published_at()))
+    }
+
     fn new(url: &str) -> Result<Self, BackendError> {
         let req = get(url)?;
         if !req.status().is_success() {
@@ -83,37 +136,43 @@ impl Backend for RoyalRoad {
         Ok(vec![authors.unwrap()])
     }
 
-    fn get_backend_regexps() -> Vec<Regex> {
-        vec![Regex::new(
-            r"https?://www.royalroad\.com/fiction/(?<fiction_id>\d+)/(?<fiction_title_slug>\w+)",
-        )
-        .unwrap()]
-    }
-
-    fn get_backend_name() -> &'static str {
-        "royalroad"
-    }
-
     fn get_chapter(&self, chapter_number: u32) -> Result<Chapter, BackendError> {
         if chapter_number == 0 {
             return Err(BackendError::UnknownChapter(chapter_number));
         }
+        // Create the CSS selectors
         let chapter_href_selector = Selector::parse(CHAPTER_TITLE_SELECTOR).unwrap();
         let chapter_date_selector = Selector::parse(CHAPTER_CREATED_AT_SELECTOR).unwrap();
+        // Get che chapter URL
         let chapter_url = self
             .fiction_page
             .select(&chapter_href_selector)
             .map(|select| select.attr("href").unwrap().to_string())
             .nth(chapter_number as usize - 1)
             .ok_or(BackendError::UnknownChapter(chapter_number))?;
+        // Get the chapter publication date
         let chapter_date = self
             .fiction_page
             .select(&chapter_date_selector)
             .map(|select| DateTime::parse_from_rfc3339(select.attr("datetime").unwrap()))
             .nth(chapter_number as usize - 1)
             .ok_or(BackendError::UnknownChapter(chapter_number))?;
+        let chapter_url = format!("https://www.royalroad.com{}", chapter_url);
+        let chapter_url_regex = Regex::new(r"https?://www\.royalroad\.com/fiction/(?<fiction_id>\d+)/(?<fiction_title_slug>[\w-]+)/chapter/(?<chapter_id>\d+)/(?<chapter_title_slug>[\w-]+)").unwrap();
+        let matches = chapter_url_regex.captures(&chapter_url).unwrap();
+        let metadata = HashMap::from([
+            (
+                "chapter_id".to_string(),
+                matches.name("chapter_id").unwrap().as_str().to_string(),
+            ),
+            (
+                "fiction_id".to_string(),
+                matches.name("fiction_id").unwrap().as_str().to_string(),
+            ),
+        ]);
+
         debug!("Attempting to get chapter {chapter_url}");
-        let res = get(format!("https://www.royalroad.com{}", &chapter_url))?;
+        let res = get(&chapter_url)?;
         if !res.status().is_success() {
             return Err(BackendError::RequestFailed(format!(
                 "failed to get chapter {} from {}: {}",
@@ -139,7 +198,10 @@ impl Backend for RoyalRoad {
             index: chapter_number,
             title: Some(chapter_title),
             content: chapter_content,
+            chapter_url,
+            fiction_url: self.url.clone(),
             published_at: Some(chapter_date?.to_utc()),
+            metadata,
         })
     }
 

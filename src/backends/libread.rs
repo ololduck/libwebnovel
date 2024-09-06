@@ -1,7 +1,7 @@
 use regex::Regex;
 use scraper::{Html, Selector};
 
-use crate::backends::{freewebnovel, Backend, BackendError};
+use crate::backends::{freewebnovel, Backend, BackendError, ChapterOrderingFn, FreeWebNovel};
 use crate::utils::get;
 use crate::Chapter;
 
@@ -31,6 +31,37 @@ impl Default for LibRead {
 /// );
 /// ```
 impl Backend for LibRead {
+    fn get_backend_regexps() -> Vec<Regex> {
+        vec![Regex::new(r"https?://libread\.com/libread/\w+").unwrap()]
+    }
+
+    fn get_backend_name() -> &'static str {
+        "libread"
+    }
+
+    /// returns a function capable of comparing two chapters
+    /// ```rust
+    /// use libwebnovel::backends::LibRead;
+    /// use libwebnovel::Backend;
+    /// let backend =
+    ///     LibRead::new("https://libread.com/libread/the-guide-to-conquering-earthlings-33024")
+    ///         .unwrap();
+    /// let mut chapters = vec![
+    ///     backend.get_chapter(2).unwrap(),
+    ///     backend.get_chapter(1).unwrap(),
+    ///     backend.get_chapter(4).unwrap(),
+    ///     backend.get_chapter(3).unwrap(),
+    /// ];
+    /// chapters.sort_by(LibRead::get_ordering_function());
+    /// assert_eq!(chapters[0].title(), &Some("Chapter 1: 01".to_string()));
+    /// assert_eq!(chapters[1].title(), &Some("Chapter 2: The 02".to_string()));
+    /// assert_eq!(chapters[2].title(), &Some("Chapter 3: 03".to_string()));
+    /// assert_eq!(chapters[3].title(), &Some("Chapter 4: 04".to_string()));
+    /// ```
+    fn get_ordering_function() -> ChapterOrderingFn {
+        FreeWebNovel::get_ordering_function()
+    }
+
     /// Creates a new libread backend from the given URL
     /// ```rust
     /// use libwebnovel::backends::LibRead;
@@ -95,14 +126,6 @@ impl Backend for LibRead {
         freewebnovel::authors(&self.page)
     }
 
-    fn get_backend_regexps() -> Vec<Regex> {
-        vec![Regex::new(r"https?://libread\.com/libread/\w+").unwrap()]
-    }
-
-    fn get_backend_name() -> &'static str {
-        "libread"
-    }
-
     /// returns a chapter
     /// ```rust
     /// use libwebnovel::backends::LibRead;
@@ -130,6 +153,7 @@ impl Backend for LibRead {
         println!("{:?}", chapter_url);
         let mut chapter = freewebnovel::get_chapter(chapter_url)?;
         chapter.index = chapter_number;
+        chapter.fiction_url = self.url.clone();
         Ok(chapter)
     }
 

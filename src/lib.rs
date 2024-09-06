@@ -25,7 +25,8 @@
 //!
 //! fn main() {
 //!     // Get the backend matching the given URL
-//!     let fiction_backend = Backends::new("https://www.royalroad.com/fiction/21220/mother-of-learning").unwrap();
+//!     let fiction_backend =
+//!         Backends::new("https://www.royalroad.com/fiction/21220/mother-of-learning").unwrap();
 //!     // Get all the chapters of the webnovel
 //!     let chapters = fiction_backend.get_chapters().unwrap();
 //!
@@ -34,7 +35,8 @@
 //!     let mut f = File::create(&epub_path).unwrap();
 //!     write_chapters_to_epub(&mut f, &chapters).unwrap();
 //!
-//!     // Since this code example also sort of serves as an integration test, remove the created file :p
+//!     // Since this code example also sort of serves as an integration test,
+//!     // remove the created file :p
 //!     std::fs::remove_file(epub_path).unwrap();
 //! }
 //!
@@ -43,6 +45,10 @@
 //!     Ok(())
 //! }
 //! ```
+//!
+//! See [`Backends`] for more information on how to use the library. The
+//! documentation of the [`Backend`] trait may also be useful, especially if you
+//! want to implement an other backend (don't forget to share it with the [main repository](https://codeberg.org/paulollivier/libwebnovel)!).
 //!
 //! ## Cargo features
 //!
@@ -60,7 +66,7 @@
 //! libwebnovel = {version="*", features = ["all"]}
 //! ```
 //!
-//! ## TODO
+//! ## Crate features / Task list
 //!
 //! - [ ] Find a way to handle something other than text content:
 //!   - [ ] images
@@ -76,22 +82,50 @@
 //!   important for images?
 //! - [ ] create a binary using this lib to save webnovels to disk. It may also
 //!   serve as a sample implementation?
+//! - [x] implement a way to get an [`Ordering`][std::cmp::Ordering] between
+//!   chapters. That enables us to detect collisions and still sort chapters
+//!   that may have their indexes altered, such as in the case of removal in the
+//!   source.
+//! - [x] Add a way to get the chapter url & parent fiction url from a given
+//!   chapter.
+//! - [x] ~maybe find a way to parse a chapter index/number as to not overwrite
+//!   local files when chapters are deleted on the backend~ -> done via
+//!   [`Backends::get_ordering_function`].
+//!
+//! ## Legal
+//!
+//! Without explicit refutation in the header of any file in this repository,
+//! all files in this repository are considered under the terms of the AGPL-3
+//! license (of which a copy can be found in the LICENSE file at the root of
+//! this repository) and bearing the mention "Copyright (c) 2024 paulollivier &
+//! contributors".
+//!
+//! Basically, please do not use this code without crediting its writer(s) or
+//! for a commercial project.
+
+use std::collections::HashMap;
 
 use chrono::{DateTime, Utc};
 use getset::{CopyGetters, Getters, Setters};
 
 /// A chapter of a webnovel
-#[derive(Debug, Getters, Setters, CopyGetters, Default)]
+#[derive(Debug, Getters, Setters, CopyGetters, Default, Clone)]
 #[getset(get = "pub")]
 pub struct Chapter {
-    /// Index of this chapter in the grand scheme of things
+    /// Index of this chapter in the grand scheme of things.
     index: u32,
-    /// Title of this chapter, if any
+    /// Title of this chapter, if any.
     title: Option<String>,
-    /// Content of this chapter
+    /// Content of this chapter.
     content: String,
-    /// date this chapter was published
+    /// Where can this chapter be found?
+    chapter_url: String,
+    /// Where can the fiction this chapter is from be found?
+    fiction_url: String,
+    /// date this chapter was published.
     published_at: Option<DateTime<Utc>>,
+    /// Arbitrary metadata added by the backend.
+    metadata: HashMap<String, String>,
 }
 
 /// implementations of backends

@@ -1,3 +1,4 @@
+use std::cmp::Ordering;
 use std::fmt::Debug;
 
 use regex::Regex;
@@ -46,30 +47,51 @@ pub enum BackendError {
     UnknownChapter(u32),
 }
 
+type ChapterOrderingFn = Box<dyn Fn(&Chapter, &Chapter) -> Ordering>;
+
 /// Must be implemented by each backend.
 ///
 /// ## How to implement a new backend ?
-/// There are multiple ways to do this, but basically, you only need to
-/// implement the methods defined by this trait.
+///
+/// First, you need to implement the [`Backend`] trait for a struct capable of
+/// handling your favorite novelreading website. Have a look at the
+/// implementation of [`RoyalRoad`] (if the `royalroad` feature is active) for
+/// an example.
+///
+/// Second, you need to add a feature in [Cargo.toml](/Cargo.toml) with your
+/// backend name & what it requires.
+///
+/// Third, you need to add your new backend to the variants of [`Backends`].
+/// Don't forget to tag it with `#[cfg(feature = "my_backend_feature_name")]`.
+///
+/// Fourth, you need to change all the methods of [`Backends`] to accept your
+/// new variant. Don't forget to tag the new variant behaviour with
+/// `#[cfg(feature = "my_backend_feature_name")]`.
 pub trait Backend: Default + Debug
 where
     Self: Sized,
 {
+    /// Gets the list of url regexps supported by this backend.
+    fn get_backend_regexps() -> Vec<Regex>;
+    /// An identifier for the backend. It is static and can be used for
+    /// long-term storage.
+    fn get_backend_name() -> &'static str;
+    /// Returns a function enabling chapter ordering. This is important to
+    /// ensure that chapters may still be correctly sorted when the source
+    /// chapters have been removed.
+    fn get_ordering_function() -> ChapterOrderingFn;
     /// Creates a new instance of itself
     fn new(url: &str) -> Result<Self, BackendError>;
     /// Returns the title of the fiction
     fn title(&self) -> Result<String, BackendError>;
-    /// returns the url of the fiction
+    /// Returns the url of the fiction
     fn url(&self) -> String;
 
     /// Returns a list of authors, if any
     fn get_authors(&self) -> Result<Vec<String>, BackendError>;
 
-    /// Gets the list of url regexps supported by this backend.
-    fn get_backend_regexps() -> Vec<Regex>;
-    /// An identifier.
-    fn get_backend_name() -> &'static str;
-    /// Returns a single chapter.
+    /// Returns a single chapter. The chapter number need to be _unique_, as
+    /// some webnovel platforms allow truncating the chapter list.
     fn get_chapter(&self, chapter_number: u32) -> Result<Chapter, BackendError>;
     /// Must return the total chapter count
     fn get_chapter_count(&self) -> Result<u32, BackendError>;
@@ -106,6 +128,26 @@ pub enum Backends {
 }
 
 impl Backends {
+    /// Returns the ordering function specific to the underlying backend.
+    ///
+    /// # Panics
+    ///
+    /// Panics when `self` is [`Backends::Dumb`].
+    pub fn get_ordering_function(&self) -> ChapterOrderingFn {
+        match self {
+            Backends::Dumb => {
+                unimplemented!()
+            }
+            #[cfg(feature = "royalroad")]
+            Backends::RoyalRoad(_) => RoyalRoad::get_ordering_function(),
+            #[cfg(feature = "libread")]
+            Backends::LibRead(_) => LibRead::get_ordering_function(),
+            #[cfg(feature = "freewebnovel")]
+            Backends::FreeWebNovel(_) => FreeWebNovel::get_ordering_function(),
+        }
+    }
+
+    /// Creates a new [`Backends`] variant from the given URL.
     pub(crate) fn new_from_url(&self, url: &str) -> Result<Backends, BackendError> {
         match self {
             Backends::Dumb => Ok(Self::Dumb),
@@ -117,10 +159,10 @@ impl Backends {
             Backends::FreeWebNovel(_) => Ok(Self::FreeWebNovel(FreeWebNovel::new(url)?)),
         }
     }
-}
 
-impl Backends {
-    pub(crate) fn get_backend_regexps(&self) -> Vec<Regex> {
+    /// Returns the regexps used by the underlying backend. [`Backends::Dumb`]
+    /// returns an empty [`Vec`].
+    pub fn get_backend_regexps(&self) -> Vec<Regex> {
         match self {
             Backends::Dumb => Vec::new(),
             #[cfg(feature = "royalroad")]
@@ -131,11 +173,61 @@ impl Backends {
             Backends::FreeWebNovel(_) => FreeWebNovel::get_backend_regexps(),
         }
     }
+
+    /// Returns the underlying backend name.
+    pub fn get_backend_name(&self) -> &'static str {
+        match self {
+            Backends::Dumb => "dummy",
+            #[cfg(feature = "royalroad")]
+            Backends::RoyalRoad(_) => RoyalRoad::get_backend_name(),
+            #[cfg(feature = "libread")]
+            Backends::LibRead(_) => LibRead::get_backend_name(),
+            #[cfg(feature = "freewebnovel")]
+            Backends::FreeWebNovel(_) => FreeWebNovel::get_backend_name(),
+        }
+    }
 }
 
+/// All possible backend variants are contained within [`Backends`]. This
+/// implementation tries to dispatch method calls to their appropriate
+/// implementors.
+///
+/// ```rust
+/// use libwebnovel::{Backend, Backends};
+/// let backend =
+///     Backends::new("https://www.royalroad.com/fiction/21220/mother-of-learning").unwrap();
+/// assert_eq!(backend.title().unwrap(), "Mother of Learning");
+/// ```
 impl Backend for Backends {
-    /// Builds a new backend for a given URL.
-    /// ```
+    /// Not implemented for [`Backends`]. Use
+    /// [`Backends::get_backend_regexps(&self)`][a] instead.
+    ///
+    /// [a]: Backends#method.get_backend_regexps
+    fn get_backend_regexps() -> Vec<Regex> {
+        unimplemented!()
+    }
+
+    /// Not implemented for [`Backends`]. Use
+    /// [`Backends::get_backend_name(&self)`][a] instead.
+    ///
+    /// [a]: Backends#method.get_backend_name
+    fn get_backend_name() -> &'static str {
+        unimplemented!()
+    }
+
+    /// Can't implement this function for backends without reference to `self`.
+    /// use [`Backends::get_ordering_function(&self)`][a] instead.
+    ///
+    /// [a]: Backends#method.get_ordering_function
+    fn get_ordering_function() -> ChapterOrderingFn {
+        unimplemented!()
+    }
+
+    /// Builds a new backend for a given URL. Auto-detects the backend to use
+    /// from the given URL, returning [`BackendError::NoMatchingBackendFound`]
+    /// if none could be found.
+    ///
+    /// ```rust
     /// use libwebnovel::{Backend, Backends};
     /// let backend =
     ///     Backends::new("https://www.royalroad.com/fiction/21220/mother-of-learning").unwrap();
@@ -215,16 +307,6 @@ impl Backend for Backends {
         }
     }
 
-    /// Not implemented for [`Backends`]
-    fn get_backend_regexps() -> Vec<Regex> {
-        unimplemented!()
-    }
-
-    /// Not implemented for [`Backends`]
-    fn get_backend_name() -> &'static str {
-        unimplemented!()
-    }
-
     /// Returns a chapter of the webnovel, given its chapter number
     /// ```
     /// use libwebnovel::{Backend, Backends};
@@ -252,12 +334,18 @@ impl Backend for Backends {
     }
 
     /// Returns the total count of the webnovel's chapters.
+    ///
+    /// # Example
     /// ```
     /// use libwebnovel::{Backend, Backends};
     /// let backend =
     ///     Backends::new("https://www.royalroad.com/fiction/21220/mother-of-learning").unwrap();
     /// assert_eq!(backend.get_chapter_count().unwrap(), 109);
     /// ```
+    ///
+    /// # Panics
+    ///
+    /// Panics when used on the [`Backends::Dumb`] backend.
     fn get_chapter_count(&self) -> Result<u32, BackendError> {
         match self {
             Backends::Dumb => {
