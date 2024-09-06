@@ -95,4 +95,4 @@ contributors".
 Basically, please do not use this code without crediting its writer(s) or
 for a commercial project.
 
-License: AGPL-3
+License: AGPL-3.0-or-later
