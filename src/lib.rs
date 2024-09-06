@@ -104,28 +104,233 @@
 //! for a commercial project.
 
 use std::collections::HashMap;
+use std::fmt::Display;
+use std::str::FromStr;
 
 use chrono::{DateTime, Utc};
 use getset::{CopyGetters, Getters, Setters};
+use log::{debug, trace};
+use scraper::{Html, Selector};
 
 /// A chapter of a webnovel
-#[derive(Debug, Getters, Setters, CopyGetters, Default, Clone)]
-#[getset(get = "pub")]
+#[derive(Debug, Getters, Setters, CopyGetters, Default, Clone, PartialEq)]
 pub struct Chapter {
     /// Index of this chapter in the grand scheme of things.
+    #[getset(get = "pub", set)]
     index: u32,
     /// Title of this chapter, if any.
+    #[getset(get = "pub", set)]
     title: Option<String>,
     /// Content of this chapter.
+    #[getset(get = "pub")]
     content: String,
     /// Where can this chapter be found?
+    #[getset(get = "pub", set)]
     chapter_url: String,
     /// Where can the fiction this chapter is from be found?
+    #[getset(get = "pub", set)]
     fiction_url: String,
     /// date this chapter was published.
+    #[getset(get = "pub", set)]
     published_at: Option<DateTime<Utc>>,
     /// Arbitrary metadata added by the backend.
+    #[getset(get = "pub", set)]
     metadata: HashMap<String, String>,
+}
+
+impl Chapter {
+    fn set_content(&mut self, s: impl Into<String>) {
+        self.content = Html::parse_fragment(&s.into())
+            .html()
+            .strip_prefix("<html>")
+            .unwrap()
+            .strip_suffix("</html>")
+            .unwrap()
+            .trim()
+            .to_string();
+    }
+
+    /// Add a key/value pair to the chapter's metadata
+    pub fn add_metadata(&mut self, key: impl Into<String>, value: impl Into<String>) {
+        self.metadata.insert(key.into(), value.into());
+    }
+}
+
+/// Attempts to parse a string into a Chapter.
+///
+/// ```rust
+/// use std::str::FromStr;
+///
+/// use libwebnovel::Chapter;
+/// let chapter_str = r#"
+/// <!--
+/// index: 1
+/// chapter_url: https://read.freewebnovel.me/the-guide-to-conquering-earthlings/chapter-1
+/// fiction_url: https://freewebnovel.com/the-guide-to-conquering-earthlings.html
+/// published_at: not_found
+/// metadata:
+///   authors: Ye Fei Ran, 叶斐然
+/// -->
+/// <h1 class="mainTitle">Chapter 1: 01</h1>
+/// <div class="content">
+/// <p>this is some sample content, whatever man.</p>
+/// </div>
+/// "#;
+/// let chapter = Chapter::from_str(chapter_str).unwrap();
+/// assert_eq!(chapter.title(), &Some("Chapter 1: 01".to_string()));
+/// assert_eq!(chapter.index(), &1);
+/// assert_eq!(
+///     chapter.chapter_url(),
+///     "https://read.freewebnovel.me/the-guide-to-conquering-earthlings/chapter-1"
+/// );
+/// assert_eq!(
+///     chapter.fiction_url(),
+///     "https://freewebnovel.com/the-guide-to-conquering-earthlings.html"
+/// );
+/// assert!(chapter.published_at().is_none());
+/// assert_eq!(
+///     chapter.content(),
+///     "<p>this is some sample content, whatever man.</p>"
+/// );
+/// assert_eq!(
+///     chapter.metadata().get("authors"),
+///     Some(&"Ye Fei Ran, 叶斐然".to_string())
+/// );
+/// ```
+impl FromStr for Chapter {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let mut chapter = Chapter::default();
+        let mut chapter_data = HashMap::new();
+        let mut metadata = HashMap::new();
+        let mut in_metadata = false;
+        let mut in_chapter_data = false;
+        let mut in_content = false;
+        let mut content = String::new();
+
+        for line in s.lines() {
+            trace!("line: {}", line);
+            if line.starts_with("<!--") {
+                in_chapter_data = true;
+                debug!("found chapter data start");
+                continue;
+            } else if line.starts_with("-->") {
+                in_chapter_data = false;
+                debug!("found chapter data end");
+                continue;
+            }
+
+            if in_chapter_data {
+                if line.starts_with("metadata:") {
+                    debug!("found metadata start");
+                    in_metadata = true;
+                    continue;
+                }
+                if !line.starts_with("  ") && in_metadata {
+                    debug!("found metadata end");
+                    in_metadata = false;
+                }
+                let parts: Vec<&str> = line.trim().splitn(2, ':').collect();
+                if parts.len() == 2 {
+                    let key = parts[0].trim();
+                    let value = parts[1].trim();
+                    if in_metadata {
+                        debug!("found metadata {}={}", key, value);
+                        metadata.insert(key.to_string(), value.to_string());
+                    } else {
+                        debug!("found chapter_data {}={}", key, value);
+                        chapter_data.insert(key.to_string(), value.to_string());
+                    }
+                }
+            } else {
+                if let Some(title) = line.strip_prefix("<h1 class=\"mainTitle\">") {
+                    chapter.set_title(Some(title.trim_end_matches("</h1>").to_string()));
+                } else if line.starts_with("<div class=\"content\">") {
+                    content.push_str("<div class=\"content\">");
+                    in_content = true;
+                } else if in_content {
+                    content.push_str(&format!("{}\n", line));
+                }
+            }
+        }
+        chapter.set_index(
+            chapter_data
+                .get("index")
+                .and_then(|s| s.parse().ok())
+                .ok_or(format!(
+                    "Invalid chapter index: {:?}",
+                    chapter_data.get("index")
+                ))?,
+        );
+        chapter.set_chapter_url(
+            chapter_data
+                .get("chapter_url")
+                .map(|s| s.to_string())
+                .ok_or(format!(
+                    "Invalid chapter url: {:?}",
+                    chapter_data.get("chapter_url")
+                ))?,
+        );
+        chapter.set_fiction_url(
+            chapter_data
+                .get("fiction_url")
+                .map(|s| s.to_string())
+                .ok_or(format!(
+                    "Invalid fiction url: {:?}",
+                    chapter_data.get("fiction_url")
+                ))?,
+        );
+        chapter.set_published_at(chapter_data.get("published_at").and_then(|s| {
+            if s == "not_found" {
+                None
+            } else {
+                Some(DateTime::parse_from_rfc3339(s).ok()?.with_timezone(&Utc))
+            }
+        }));
+        chapter.set_metadata(metadata);
+        chapter.set_content(
+            Html::parse_fragment(&content)
+                .select(&Selector::parse("div.content").unwrap())
+                .nth(0)
+                .unwrap()
+                .inner_html(),
+        );
+        Ok(chapter)
+    }
+}
+
+/// Implement [`Display`] for [`Chapter`] (and consequentially, [`ToString`]).
+impl Display for Chapter {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut s = String::new();
+        s.push_str("<!--\n");
+        s.push_str(&format!("index: {}\n", self.index));
+        s.push_str(&format!("chapter_url: {}\n", self.chapter_url));
+        s.push_str(&format!("fiction_url: {}\n", self.fiction_url));
+        s.push_str(&format!(
+            "published_at: {}\n",
+            if let Some(dt) = self.published_at {
+                dt.to_rfc3339()
+            } else {
+                "not_found".to_string()
+            }
+        ));
+
+        s.push_str("metadata:\n");
+        for (key, value) in &self.metadata {
+            s.push_str(&format!("  {}: {}\n", key, value));
+        }
+        s.push_str("-->\n");
+        if let Some(title) = &self.title {
+            s.push_str(&format!("<h1 class=\"mainTitle\">{}</h1>\n", title));
+        }
+        s.push_str(&format!(
+            "<div class=\"content\">\n{}\n</div>",
+            self.content
+        ));
+        write!(f, "{}", s)
+    }
 }
 
 /// implementations of backends
@@ -133,3 +338,61 @@ pub mod backends;
 pub use backends::{Backend, Backends};
 
 pub(crate) mod utils;
+
+#[cfg(test)]
+mod tests {
+    use std::str::FromStr;
+
+    use indoc::indoc;
+    use test_log::test;
+
+    use crate::Chapter;
+
+    #[test]
+    fn test_chapter_display() {
+        let mut chapter = Chapter::default();
+        chapter.set_title(Some("title".to_string()));
+        chapter.set_chapter_url("https://chapter.url/".to_string());
+        chapter.set_fiction_url("https://fiction.url".to_string());
+        chapter.set_index(1);
+        chapter.published_at = None;
+        chapter
+            .metadata
+            .insert("authors".to_string(), "Ye Fei Ran, 叶斐然".to_string());
+        chapter.set_content("<p>Test content</p>".to_string());
+        let s = chapter.to_string();
+        assert_eq!(
+            s,
+            indoc! {
+                r#"<!--
+                index: 1
+                chapter_url: https://chapter.url/
+                fiction_url: https://fiction.url
+                published_at: not_found
+                metadata:
+                  authors: Ye Fei Ran, 叶斐然
+                -->
+                <h1 class="mainTitle">title</h1>
+                <div class="content">
+                <p>Test content</p>
+                </div>"#
+            }
+        );
+    }
+    #[test]
+    fn test_chapter_to_string_and_back() {
+        let mut chapter = Chapter::default();
+        chapter.set_title(Some("title".to_string()));
+        chapter.set_chapter_url("https://chapter.url/".to_string());
+        chapter.set_fiction_url("https://fiction.url".to_string());
+        chapter.set_index(1);
+        chapter.published_at = None;
+        chapter
+            .metadata
+            .insert("authors".to_string(), "Ye Fei Ran, 叶斐然".to_string());
+        chapter.set_content("<p>test content</p>".to_string());
+        let s = chapter.to_string();
+        let chapter_2 = Chapter::from_str(&s).unwrap();
+        assert_eq!(chapter, chapter_2);
+    }
+}

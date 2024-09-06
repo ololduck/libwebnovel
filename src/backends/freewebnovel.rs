@@ -205,15 +205,11 @@ pub(crate) fn get_chapter(url: impl IntoUrl) -> Result<Chapter, BackendError> {
     let content_selector = Selector::parse(CHAPTER_CONTENT_SELECTOR).unwrap();
     let chapter_title = page.select(&title_selector).next().unwrap().inner_html();
     let chapter_content = page.select(&content_selector).next().unwrap().inner_html();
-    Ok(Chapter {
-        index: 0,
-        title: Some(chapter_title),
-        content: chapter_content,
-        chapter_url: url_str,
-        fiction_url: "".to_string(),
-        published_at: None,
-        metadata: Default::default(),
-    })
+    let mut chapter = Chapter::default();
+    chapter.set_title(Some(chapter_title));
+    chapter.set_chapter_url(url_str);
+    chapter.set_content(chapter_content);
+    Ok(chapter)
 }
 pub(crate) fn title(page: &Html) -> Result<String, BackendError> {
     let selector = Selector::parse(TITLE_SELECTOR).unwrap();
@@ -249,4 +245,25 @@ pub(crate) fn chapter_count(page: &Html) -> Result<u32, BackendError> {
         .map(|select| select.attr("href").unwrap().to_string())
         .collect();
     Ok(chapter_links.len() as u32)
+}
+
+#[cfg(test)]
+mod tests {
+    use std::str::FromStr;
+
+    use test_log::test;
+
+    use crate::backends::FreeWebNovel;
+    use crate::{Backend, Chapter};
+
+    #[test]
+    fn test_chapter_to_string_and_back() {
+        let b =
+            FreeWebNovel::new("https://freewebnovel.com/the-guide-to-conquering-earthlings.html")
+                .unwrap();
+        let chapter = b.get_chapter(1).unwrap();
+        let s = chapter.to_string();
+        let chapter2 = Chapter::from_str(&s).unwrap();
+        assert_eq!(chapter, chapter2);
+    }
 }

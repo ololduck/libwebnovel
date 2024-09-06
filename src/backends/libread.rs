@@ -170,3 +170,23 @@ impl Backend for LibRead {
         freewebnovel::chapter_count(&self.page)
     }
 }
+#[cfg(test)]
+mod tests {
+    use std::str::FromStr;
+
+    use test_log::test;
+
+    use crate::backends::LibRead;
+    use crate::{Backend, Chapter};
+
+    #[test]
+    fn test_chapter_to_string_and_back() {
+        let b =
+            LibRead::new("https://libread.com/libread/the-guide-to-conquering-earthlings-33024")
+                .unwrap();
+        let chapter = b.get_chapter(1).unwrap();
+        let s = chapter.to_string();
+        let chapter2 = Chapter::from_str(&s).unwrap();
+        assert_eq!(chapter, chapter2);
+    }
+}

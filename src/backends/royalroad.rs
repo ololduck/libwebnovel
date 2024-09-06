@@ -193,16 +193,17 @@ impl Backend for RoyalRoad {
             .select(&Selector::parse(CHAPTER_PAGE_CONTENT).unwrap())
             .next()
             .unwrap()
-            .inner_html();
-        Ok(Chapter {
-            index: chapter_number,
-            title: Some(chapter_title),
-            content: chapter_content,
-            chapter_url,
-            fiction_url: self.url.clone(),
-            published_at: Some(chapter_date?.to_utc()),
-            metadata,
-        })
+            .inner_html()
+            .to_string();
+        let mut chapter = Chapter::default();
+        chapter.set_index(chapter_number);
+        chapter.set_title(Some(chapter_title));
+        chapter.set_chapter_url(chapter_url);
+        chapter.set_fiction_url(self.url().clone());
+        chapter.set_published_at(Some(chapter_date?.to_utc()));
+        chapter.set_metadata(metadata);
+        chapter.set_content(chapter_content);
+        Ok(chapter)
     }
 
     fn get_chapter_count(&self) -> Result<u32, BackendError> {
@@ -213,5 +214,35 @@ impl Backend for RoyalRoad {
             .map(|select| select.attr("href").unwrap().to_string())
             .collect();
         Ok(chapter_urls.len() as u32)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::str::FromStr;
+
+    use scraper::Html;
+    use test_log::test;
+
+    use crate::backends::RoyalRoad;
+    use crate::{Backend, Chapter};
+
+    const TEST_URL: &str = "https://www.royalroad.com/fiction/21220/mother-of-learning";
+    #[test]
+    fn test_chapter_to_string_and_back() {
+        let b = RoyalRoad::new(TEST_URL).unwrap();
+        let chapter = b.get_chapter(1).unwrap();
+        let s = chapter.to_string();
+        let chapter2 = Chapter::from_str(&s).unwrap();
+        assert_eq!(chapter.index, chapter2.index);
+        assert_eq!(chapter.title, chapter2.title);
+        assert_eq!(chapter.chapter_url, chapter2.chapter_url);
+        assert_eq!(chapter.fiction_url, chapter2.fiction_url);
+        assert_eq!(chapter.published_at, chapter2.published_at);
+        assert_eq!(chapter.metadata, chapter2.metadata);
+        assert_eq!(
+            Html::parse_fragment(&chapter.content),
+            Html::parse_fragment(&chapter2.content)
+        );
     }
 }
