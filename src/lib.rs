@@ -5,7 +5,7 @@
     rustdoc::bare_urls
 )]
 #![warn(rustdoc::unescaped_backticks)]
-//!![docs.rs](https://img.shields.io/docsrs/libwebnovel)
+//! [![docs.rs](https://img.shields.io/docsrs/libwebnovel)](https://docs.rs/libwebnovel)
 //!
 //! This crate deals with webnovels. You can see it as a way to access different
 //! webnovel hosting sites and be able to get their contents.
