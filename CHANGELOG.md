@@ -5,7 +5,40 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.3.2 (2024-09-07)
+
+### Chore
+
+ - <csr-id-b8a6fcee6dc9d2fa9511f992ea9d7cea0c9e0ca4/> bump version
+
+### New Features
+
+ - <csr-id-72606b68da6a671f9578534a2555ec2fc9302fe3/> Add request error handling on freewebnovel::get_chapter
+   We previously didn't check the success of the http GET request and were unable to return an appropriate error in case of a request failure.
+
+### Commit Statistics
+
+<csr-read-only-do-not-edit/>
+
+ - 2 commits contributed to the release.
+ - 2 commits were understood as [conventional](https://www.conventionalcommits.org).
+ - 0 issues like '(#ID)' were seen in commit messages
+
+### Commit Details
+
+<csr-read-only-do-not-edit/>
+
+<details><summary>view details</summary>
+
+ * **Uncategorized**
+    - Bump version (b8a6fce)
+    - Add request error handling on freewebnovel::get_chapter (72606b6)
+</details>
+
 ## v0.3.1 (2024-09-06)
+
+<csr-id-9f05c4800e4c1d715ac58d9fa3ac4a2623cbf751/>
+<csr-id-a930c6734c1b5c968445750b6ef4de9ef2f813c2/>
 
 ### Chore
 
@@ -25,7 +58,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <csr-read-only-do-not-edit/>
 
- - 4 commits contributed to the release.
+ - 5 commits contributed to the release.
  - 4 commits were understood as [conventional](https://www.conventionalcommits.org).
  - 0 issues like '(#ID)' were seen in commit messages
 
@@ -36,6 +69,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <details><summary>view details</summary>
 
  * **Uncategorized**
+    - Release libwebnovel v0.3.1 (0e70a1c)
     - Update README.md (9f05c48)
     - Add Chapter (de)serialization (62fbb66)
     - Add keywords & categories for crates.io (a930c67)
@@ -94,9 +128,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Include all features on docs generation (16e3a0b)
     - Add more lints & fix missing intra links (d5c35c9)
 </details>
-
-<csr-unknown>
-saving the chapters on disk & later merging with online chapters andstill being able to order them, for instance chronologically;<csr-unknown/>
 
 ## v0.2.0 (2024-09-05)
 
