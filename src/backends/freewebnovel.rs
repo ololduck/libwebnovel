@@ -200,6 +200,9 @@ impl Backend for FreeWebNovel {
 pub(crate) fn get_chapter(url: impl IntoUrl) -> Result<Chapter, BackendError> {
     let url_str = url.into_url()?.to_string();
     let resp = get(&url_str)?;
+    if !resp.status().is_success() {
+        return Err(BackendError::RequestFailed(format!("{:?}", resp.status())));
+    }
     let page = Html::parse_document(&resp.text()?);
     let title_selector = Selector::parse(CHAPTER_TITLE_SELECTOR).unwrap();
     let content_selector = Selector::parse(CHAPTER_CONTENT_SELECTOR).unwrap();
