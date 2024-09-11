@@ -12,6 +12,7 @@ const AUTHORS_SELECTOR: &str = "a.a1";
 pub(crate) const CHAPTER_LIST_SELECTOR: &str = "div.m-newest2 ul#idData li a.con";
 const CHAPTER_TITLE_SELECTOR: &str = "div.top span.chapter";
 const CHAPTER_CONTENT_SELECTOR: &str = "div.txt div#article";
+const FICTION_COVER_IMAGE_URL_SELECTOR: &str = "meta[property='og:image']";
 
 /// An implementation of backend for [FreeWebNovel](https://freewebnovel.com)
 #[derive(Debug)]
@@ -137,6 +138,24 @@ impl Backend for FreeWebNovel {
         self.url.clone()
     }
 
+    /// Returns the cover URL of the fiction
+    ///
+    /// ```rust
+    /// use libwebnovel::backends::FreeWebNovel;
+    /// use libwebnovel::Backend;
+    /// let backend =
+    ///     FreeWebNovel::new("https://freewebnovel.com/the-guide-to-conquering-earthlings.html")
+    ///         .unwrap();
+    /// let cover_url = backend.cover_url().unwrap();
+    /// assert_eq!(
+    ///     cover_url,
+    ///     "https://freewebnovel.com/files/article/image/4/4420/4420s.jpg"
+    /// );
+    /// ```
+    fn cover_url(&self) -> Result<String, BackendError> {
+        get_cover_url(&self.page)
+    }
+
     /// returns the authors of the fiction, if any
     /// ```rust
     /// use libwebnovel::backends::FreeWebNovel;
@@ -195,6 +214,21 @@ impl Backend for FreeWebNovel {
     fn get_chapter_count(&self) -> Result<u32, BackendError> {
         chapter_count(&self.page)
     }
+}
+
+pub(crate) fn get_cover_url(page: &Html) -> Result<String, BackendError> {
+    let selector = Selector::parse(FICTION_COVER_IMAGE_URL_SELECTOR).unwrap();
+    Ok(page
+        .select(&selector)
+        .next()
+        .ok_or(BackendError::ParseError(
+            "Could not find cover url".to_string(),
+        ))?
+        .attr("content")
+        .ok_or(BackendError::ParseError(
+            "Could not find cover url: missing \"content\" attribute.".to_string(),
+        ))?
+        .to_string())
 }
 
 pub(crate) fn get_chapter(url: impl IntoUrl) -> Result<Chapter, BackendError> {

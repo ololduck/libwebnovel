@@ -50,6 +50,12 @@
 //! documentation of the [`Backend`] trait may also be useful, especially if you
 //! want to implement an other backend (don't forget to share it with the [main repository](https://codeberg.org/paulollivier/libwebnovel)!).
 //!
+//! ## Supported providers
+//!
+//! - [RoyalRoad](https://www.royalroad.com/)
+//! - [FreeWebNovel](https://freewebnovel.com/)
+//! - [LibRead](https://libread.com/)
+//!
 //! ## Cargo features
 //!
 //! Each available backend matches a [cargo `feature`](https://doc.rust-lang.org/cargo/reference/features.html) that can be enabled or
@@ -77,6 +83,7 @@
 //!   - [x] libread
 //!   - [x] freewebnovel
 //!   - [x] royalroad
+//!   - [ ] scribblehub - May be complicated because of cloudflare
 //!   - [ ] suggestions?
 //! - [ ] implement an `async` version to get a better throughput. May be
 //!   important for images?
@@ -91,6 +98,7 @@
 //! - [x] ~maybe find a way to parse a chapter index/number as to not overwrite
 //!   local files when chapters are deleted on the backend~ -> done via
 //!   [`Backends::get_ordering_function`].
+//! - [x] add a way to get the cover image of the fiction, for epub generation.
 //!
 //! ## Legal
 //!
@@ -243,15 +251,13 @@ impl FromStr for Chapter {
                         chapter_data.insert(key.to_string(), value.to_string());
                     }
                 }
-            } else {
-                if let Some(title) = line.strip_prefix("<h1 class=\"mainTitle\">") {
-                    chapter.set_title(Some(title.trim_end_matches("</h1>").to_string()));
-                } else if line.starts_with("<div class=\"content\">") {
-                    content.push_str("<div class=\"content\">");
-                    in_content = true;
-                } else if in_content {
-                    content.push_str(&format!("{}\n", line));
-                }
+            } else if let Some(title) = line.strip_prefix("<h1 class=\"mainTitle\">") {
+                chapter.set_title(Some(title.trim_end_matches("</h1>").to_string()));
+            } else if line.starts_with("<div class=\"content\">") {
+                content.push_str("<div class=\"content\">");
+                in_content = true;
+            } else if in_content {
+                content.push_str(&format!("{}\n", line));
             }
         }
         chapter.set_index(

@@ -12,10 +12,11 @@ use crate::Chapter;
 const CHAPTER_TITLE_SELECTOR: &str = "table#chapters tbody tr.chapter-row td:first-child a";
 const CHAPTER_CREATED_AT_SELECTOR: &str = "table#chapters tbody tr.chapter-row td:last-child time";
 const FICTION_TITLE_SELECTOR: &str = "div.row.fic-header div.fic-title div.col h1.font-white";
-const FICTION_AUTHORS_SELECTOR: &str = "div.row.fic-header div.fic-title div.col h4 span a";
+const FICTION_AUTHORS_SELECTOR: &str = "meta[property='books:author']";
 const CHAPTER_PAGE_TITLE_SELECTOR: &str = "div.row.fic-header div.row div h1.font-white";
 const CHAPTER_PAGE_CONTENT: &str =
     "div.page-container div.page-content-wrapper div.page-content div.container.chapter-page div div div.portlet-body div.chapter-inner.chapter-content";
+const FICTION_IMAGE_URL_SELECTOR: &str = "meta[property='og:image']";
 
 /// A [`Backend`] implementation for [RoyalRoad](https://royalroad.com)
 #[derive(Debug)]
@@ -120,20 +121,52 @@ impl Backend for RoyalRoad {
         self.url.clone()
     }
 
-    fn get_authors(&self) -> Result<Vec<String>, BackendError> {
-        let selector = Selector::parse(FICTION_AUTHORS_SELECTOR).unwrap();
-        let authors = self
+    /// Returns the cover URL of the fiction.
+    ///
+    /// ```rust
+    /// use libwebnovel::backends::RoyalRoad;
+    /// use libwebnovel::Backend;
+    /// let backend =
+    ///     RoyalRoad::new("https://www.royalroad.com/fiction/21220/mother-of-learning").unwrap();
+    /// let cover_url = backend.cover_url().unwrap();
+    /// assert_eq!(cover_url, "https://www.royalroadcdn.com/public/covers-full/21220-mother-of-learning.jpg?time=1637247458");
+    /// ```
+    fn cover_url(&self) -> Result<String, BackendError> {
+        let selector = Selector::parse(FICTION_IMAGE_URL_SELECTOR).unwrap();
+        let img_url = self
             .fiction_page
             .select(&selector)
-            .map(|selection| selection.inner_html())
-            .next();
-        if authors.is_none() {
+            .next()
+            .ok_or(BackendError::ParseError(
+                "Could not find fiction cover image url".to_string(),
+            ))?
+            .attr("content")
+            .ok_or(BackendError::ParseError(
+                "Could not find property \"content\" when searching for cover image".to_string(),
+            ))?;
+        Ok(img_url.to_string())
+    }
+
+    fn get_authors(&self) -> Result<Vec<String>, BackendError> {
+        let selector = Selector::parse(FICTION_AUTHORS_SELECTOR).unwrap();
+        let authors : Result<Vec<String>, BackendError>=
+            self.fiction_page
+                .select(&selector)
+                .map(|selection| selection.attr("content").ok_or_else(|| BackendError::ParseError("Failed to find 'content' attribute while looking at <meta property='books:author'>".to_string())).map(|s| s.to_string())).collect();
+
+        let authors = authors.or_else(|e| {
+            Err(BackendError::ParseError(format!(
+                "Failed to get authors from {}: {}",
+                self.url, e
+            )))
+        })?;
+        if authors.is_empty() {
             return Err(BackendError::ParseError(format!(
-                "Failed to get authors from {}",
-                self.url,
+                "Failed to get authors from {}: Resulting author list is empty",
+                self.url
             )));
         }
-        Ok(vec![authors.unwrap()])
+        Ok(authors)
     }
 
     fn get_chapter(&self, chapter_number: u32) -> Result<Chapter, BackendError> {

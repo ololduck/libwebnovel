@@ -10,6 +10,7 @@ pub use crate::backends::freewebnovel::FreeWebNovel;
 pub use crate::backends::libread::LibRead;
 #[cfg(feature = "royalroad")]
 pub use crate::backends::royalroad::RoyalRoad;
+use crate::utils::get;
 use crate::Chapter;
 
 #[cfg(feature = "libread")]
@@ -86,6 +87,8 @@ where
     fn title(&self) -> Result<String, BackendError>;
     /// Returns the url of the fiction
     fn url(&self) -> String;
+    /// Returns the fictions' cover URL, if any
+    fn cover_url(&self) -> Result<String, BackendError>;
 
     /// Returns a list of authors, if any
     fn get_authors(&self) -> Result<Vec<String>, BackendError>;
@@ -105,6 +108,19 @@ where
             chapters.push(chapter);
         }
         Ok(chapters)
+    }
+
+    /// Returns the fictions' cover as a byte array, if any.
+    fn cover(&self) -> Result<Vec<u8>, BackendError> {
+        let resp = get(self.cover_url()?)?;
+        if !resp.status().is_success() {
+            return Err(BackendError::RequestFailed(format!(
+                "Could not download cover image: {}",
+                resp.status()
+            )));
+        }
+        let image_bytes = resp.bytes()?;
+        Ok(image_bytes.to_vec())
     }
 }
 
@@ -280,6 +296,21 @@ impl Backend for Backends {
             Backends::LibRead(b) => b.url(),
             #[cfg(feature = "freewebnovel")]
             Backends::FreeWebNovel(b) => b.url(),
+        }
+    }
+
+    fn cover_url(&self) -> Result<String, BackendError> {
+        // Write this function, on the model of the other functions in Backends
+        match self {
+            Backends::Dumb => {
+                unimplemented!()
+            }
+            #[cfg(feature = "royalroad")]
+            Backends::RoyalRoad(backend) => backend.cover_url(),
+            #[cfg(feature = "libread")]
+            Backends::LibRead(backend) => backend.cover_url(),
+            #[cfg(feature = "freewebnovel")]
+            Backends::FreeWebNovel(backend) => backend.cover_url(),
         }
     }
 

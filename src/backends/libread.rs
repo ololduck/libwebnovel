@@ -110,6 +110,24 @@ impl Backend for LibRead {
         self.url.clone()
     }
 
+    /// Returns the cover URL of the fiction
+    ///
+    /// ```rust
+    /// use libwebnovel::backends::LibRead;
+    /// use libwebnovel::Backend;
+    /// let backend =
+    ///     LibRead::new("https://libread.com/libread/the-guide-to-conquering-earthlings-33024")
+    ///         .unwrap();
+    /// let cover_url = backend.cover_url().unwrap();
+    /// assert_eq!(
+    ///     cover_url,
+    ///     "https://libread.com/files/article/image/4/4420/4420s.jpg"
+    /// );
+    /// ```
+    fn cover_url(&self) -> Result<String, BackendError> {
+        freewebnovel::get_cover_url(&self.page)
+    }
+
     /// returns the authors of the fiction, if any
     /// ```rust
     /// use libwebnovel::backends::LibRead;
