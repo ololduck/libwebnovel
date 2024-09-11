@@ -42,6 +42,12 @@ See [`Backends`] for more information on how to use the library. The
 documentation of the [`Backend`] trait may also be useful, especially if you
 want to implement an other backend (don't forget to share it with the [main repository](https://codeberg.org/paulollivier/libwebnovel)!).
 
+### Supported providers
+
+- [RoyalRoad](https://www.royalroad.com/)
+- [FreeWebNovel](https://freewebnovel.com/)
+- [LibRead](https://libread.com/)
+
 ### Cargo features
 
 Each available backend matches a [cargo `feature`](https://doc.rust-lang.org/cargo/reference/features.html) that can be enabled or
@@ -69,6 +75,7 @@ libwebnovel = {version="*", features = ["all"]}
   - [x] libread
   - [x] freewebnovel
   - [x] royalroad
+  - [ ] scribblehub - May be complicated because of cloudflare
   - [ ] suggestions?
 - [ ] implement an `async` version to get a better throughput. May be
   important for images?
@@ -83,6 +90,7 @@ libwebnovel = {version="*", features = ["all"]}
 - [x] ~maybe find a way to parse a chapter index/number as to not overwrite
   local files when chapters are deleted on the backend~ -> done via
   [`Backends::get_ordering_function`].
+- [x] add a way to get the cover image of the fiction, for epub generation.
 
 ### Legal
 
