@@ -5,7 +5,41 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.4.0 (2024-09-11)
+
+### Chore
+
+ - <csr-id-3e715a82a79415666c46698c07f8ece387b187d2/> Update README.md
+ - <csr-id-eeb20604f7c59ba9b6be2a89325234487690c131/> bump version
+
+### New Features
+
+ - <csr-id-e9f73bdbada3e30a2826ac02046d8184343f1366/> Add fiction cover image fetching
+
+### Commit Statistics
+
+<csr-read-only-do-not-edit/>
+
+ - 3 commits contributed to the release.
+ - 3 days passed between releases.
+ - 3 commits were understood as [conventional](https://www.conventionalcommits.org).
+ - 0 issues like '(#ID)' were seen in commit messages
+
+### Commit Details
+
+<csr-read-only-do-not-edit/>
+
+<details><summary>view details</summary>
+
+ * **Uncategorized**
+    - Update README.md (3e715a8)
+    - Bump version (eeb2060)
+    - Add fiction cover image fetching (e9f73bd)
+</details>
+
 ## v0.3.2 (2024-09-07)
+
+<csr-id-b8a6fcee6dc9d2fa9511f992ea9d7cea0c9e0ca4/>
 
 ### Chore
 
@@ -20,7 +54,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <csr-read-only-do-not-edit/>
 
- - 2 commits contributed to the release.
+ - 3 commits contributed to the release.
  - 2 commits were understood as [conventional](https://www.conventionalcommits.org).
  - 0 issues like '(#ID)' were seen in commit messages
 
@@ -31,6 +65,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <details><summary>view details</summary>
 
  * **Uncategorized**
+    - Release libwebnovel v0.3.2 (7592ad2)
     - Bump version (b8a6fce)
     - Add request error handling on freewebnovel::get_chapter (72606b6)
 </details>
