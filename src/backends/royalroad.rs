@@ -154,11 +154,8 @@ impl Backend for RoyalRoad {
                 .select(&selector)
                 .map(|selection| selection.attr("content").ok_or_else(|| BackendError::ParseError("Failed to find 'content' attribute while looking at <meta property='books:author'>".to_string())).map(|s| s.to_string())).collect();
 
-        let authors = authors.or_else(|e| {
-            Err(BackendError::ParseError(format!(
-                "Failed to get authors from {}: {}",
-                self.url, e
-            )))
+        let authors = authors.map_err(|e| {
+            BackendError::ParseError(format!("Failed to get authors from {}: {}", self.url, e))
         })?;
         if authors.is_empty() {
             return Err(BackendError::ParseError(format!(
