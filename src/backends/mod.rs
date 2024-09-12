@@ -45,7 +45,7 @@ pub enum BackendError {
     DateParseError(#[from] chrono::format::ParseError),
     /// returned when we could not find the given index for a chapter
     #[error("Could not find chapter {0}")]
-    UnknownChapter(u32),
+    UnknownChapter(usize),
 }
 
 type ChapterOrderingFn = Box<dyn Fn(&Chapter, &Chapter) -> Ordering>;
@@ -95,9 +95,9 @@ where
 
     /// Returns a single chapter. The chapter number need to be _unique_, as
     /// some webnovel platforms allow truncating the chapter list.
-    fn get_chapter(&self, chapter_number: u32) -> Result<Chapter, BackendError>;
+    fn get_chapter(&self, chapter_number: usize) -> Result<Chapter, BackendError>;
     /// Must return the total chapter count
-    fn get_chapter_count(&self) -> Result<u32, BackendError>;
+    fn get_chapter_count(&self) -> Result<usize, BackendError>;
 
     /// Returns all chapters for this fiction. The default implementation simply
     /// calls [`Self::get_chapter`] repeatedly
@@ -350,7 +350,7 @@ impl Backend for Backends {
     /// );
     /// assert_eq!(*chapter.index(), 1);
     /// ```
-    fn get_chapter(&self, chapter_number: u32) -> Result<Chapter, BackendError> {
+    fn get_chapter(&self, chapter_number: usize) -> Result<Chapter, BackendError> {
         match self {
             Backends::Dumb => {
                 unimplemented!()
@@ -377,7 +377,7 @@ impl Backend for Backends {
     /// # Panics
     ///
     /// Panics when used on the [`Backends::Dumb`] backend.
-    fn get_chapter_count(&self) -> Result<u32, BackendError> {
+    fn get_chapter_count(&self) -> Result<usize, BackendError> {
         match self {
             Backends::Dumb => {
                 unimplemented!()

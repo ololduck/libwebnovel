@@ -156,7 +156,7 @@ impl Backend for LibRead {
     ///     &Some("Chapter 1: 01".to_string())
     /// );
     /// ```
-    fn get_chapter(&self, chapter_number: u32) -> Result<Chapter, BackendError> {
+    fn get_chapter(&self, chapter_number: usize) -> Result<Chapter, BackendError> {
         if chapter_number == 0 {
             return Err(BackendError::UnknownChapter(chapter_number));
         }
@@ -165,7 +165,7 @@ impl Backend for LibRead {
             .page
             .select(&chapter_list_selector)
             .map(|select| select.attr("href").unwrap())
-            .nth(chapter_number as usize - 1)
+            .nth(chapter_number - 1)
             .ok_or(BackendError::UnknownChapter(chapter_number))?;
         let chapter_url = format!("https://libread.com{}", chapter_url);
         println!("{:?}", chapter_url);
@@ -184,7 +184,7 @@ impl Backend for LibRead {
     ///         .unwrap();
     /// assert_eq!(backend.get_chapter_count().unwrap(), 60);
     /// ```
-    fn get_chapter_count(&self) -> Result<u32, BackendError> {
+    fn get_chapter_count(&self) -> Result<usize, BackendError> {
         freewebnovel::chapter_count(&self.page)
     }
 }

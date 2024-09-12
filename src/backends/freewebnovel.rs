@@ -184,7 +184,7 @@ impl Backend for FreeWebNovel {
     ///     &Some("Chapter 1: 01".to_string())
     /// );
     /// ```
-    fn get_chapter(&self, chapter_number: u32) -> Result<Chapter, BackendError> {
+    fn get_chapter(&self, chapter_number: usize) -> Result<Chapter, BackendError> {
         if chapter_number == 0 {
             return Err(BackendError::UnknownChapter(chapter_number));
         }
@@ -193,7 +193,7 @@ impl Backend for FreeWebNovel {
             .page
             .select(&chapter_list_selector)
             .map(|select| select.attr("href").unwrap())
-            .nth(chapter_number as usize - 1)
+            .nth(chapter_number - 1)
             .ok_or(BackendError::UnknownChapter(chapter_number))?;
         let chapter_url = format!("https://freewebnovel.com{}", chapter_url);
         let mut chapter = get_chapter(chapter_url)?;
@@ -211,7 +211,7 @@ impl Backend for FreeWebNovel {
     ///         .unwrap();
     /// assert_eq!(backend.get_chapter_count().unwrap(), 60);
     /// ```
-    fn get_chapter_count(&self) -> Result<u32, BackendError> {
+    fn get_chapter_count(&self) -> Result<usize, BackendError> {
         chapter_count(&self.page)
     }
 }
@@ -275,13 +275,13 @@ pub(crate) fn authors(page: &Html) -> Result<Vec<String>, BackendError> {
     Ok(authors)
 }
 
-pub(crate) fn chapter_count(page: &Html) -> Result<u32, BackendError> {
+pub(crate) fn chapter_count(page: &Html) -> Result<usize, BackendError> {
     let chapter_list_selector = Selector::parse(CHAPTER_LIST_SELECTOR).unwrap();
     let chapter_links: Vec<String> = page
         .select(&chapter_list_selector)
         .map(|select| select.attr("href").unwrap().to_string())
         .collect();
-    Ok(chapter_links.len() as u32)
+    Ok(chapter_links.len())
 }
 
 #[cfg(test)]

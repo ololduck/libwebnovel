@@ -169,7 +169,7 @@ impl Backend for RoyalRoad {
         Ok(authors)
     }
 
-    fn get_chapter(&self, chapter_number: u32) -> Result<Chapter, BackendError> {
+    fn get_chapter(&self, chapter_number: usize) -> Result<Chapter, BackendError> {
         if chapter_number == 0 {
             return Err(BackendError::UnknownChapter(chapter_number));
         }
@@ -181,14 +181,14 @@ impl Backend for RoyalRoad {
             .fiction_page
             .select(&chapter_href_selector)
             .map(|select| select.attr("href").unwrap().to_string())
-            .nth(chapter_number as usize - 1)
+            .nth(chapter_number - 1)
             .ok_or(BackendError::UnknownChapter(chapter_number))?;
         // Get the chapter publication date
         let chapter_date = self
             .fiction_page
             .select(&chapter_date_selector)
             .map(|select| DateTime::parse_from_rfc3339(select.attr("datetime").unwrap()))
-            .nth(chapter_number as usize - 1)
+            .nth(chapter_number - 1)
             .ok_or(BackendError::UnknownChapter(chapter_number))?;
         let chapter_url = format!("https://www.royalroad.com{}", chapter_url);
         let chapter_url_regex = Regex::new(r"https?://www\.royalroad\.com/fiction/(?<fiction_id>\d+)/(?<fiction_title_slug>[\w-]+)/chapter/(?<chapter_id>\d+)/(?<chapter_title_slug>[\w-]+)").unwrap();
@@ -239,14 +239,14 @@ impl Backend for RoyalRoad {
         Ok(chapter)
     }
 
-    fn get_chapter_count(&self) -> Result<u32, BackendError> {
+    fn get_chapter_count(&self) -> Result<usize, BackendError> {
         let chapter_href_selector = Selector::parse(CHAPTER_TITLE_SELECTOR).unwrap();
         let chapter_urls: Vec<String> = self
             .fiction_page
             .select(&chapter_href_selector)
             .map(|select| select.attr("href").unwrap().to_string())
             .collect();
-        Ok(chapter_urls.len() as u32)
+        Ok(chapter_urls.len())
     }
 }
 

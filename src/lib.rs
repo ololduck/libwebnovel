@@ -125,7 +125,7 @@ use scraper::{Html, Selector};
 pub struct Chapter {
     /// Index of this chapter in the grand scheme of things.
     #[getset(get = "pub", set)]
-    index: u32,
+    index: usize,
     /// Title of this chapter, if any.
     #[getset(get = "pub", set)]
     title: Option<String>,
