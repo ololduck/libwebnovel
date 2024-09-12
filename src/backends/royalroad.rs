@@ -18,6 +18,19 @@ const CHAPTER_PAGE_CONTENT: &str =
     "div.page-container div.page-content-wrapper div.page-content div.container.chapter-page div div div.portlet-body div.chapter-inner.chapter-content";
 const FICTION_IMAGE_URL_SELECTOR: &str = "meta[property='og:image']";
 
+/// This is text added to RoyalRoad (RR) chapters when reading them outside of
+/// RR's website (i guess). I think it is better to remove them since it
+/// interrupts the flow of reading, and we know it's from RR, since we are
+/// attempting to contact it directly, at the demand of the user. Maybe add a
+/// disclaimer as a footing to remind the content is from RR and preserve the
+/// spirit of these additions?
+/// On other news, if find it nice from RR to put this, from an author
+/// standpoint.
+const ROYALROAD_ANTI_THEFT_TEXT: &[&str] = &[
+    "This content has been misappropriated from Royal Road; report any instances of this story if found elsewhere.",
+    "Find this and other great novels on the author's preferred platform. Support original creators!"
+];
+
 /// A [`Backend`] implementation for [RoyalRoad](https://royalroad.com)
 #[derive(Debug)]
 pub struct RoyalRoad {
@@ -211,7 +224,24 @@ impl Backend for RoyalRoad {
                 res.text()?
             )));
         }
-        let chapter_page = Html::parse_document(&res.text()?);
+        // A bit of text transformation to get rid of RR's anti-theft added text
+        // FIXME: use a [`OnceCell`] or other to actually build the regexes only once.
+        let mut txt = res.text()?;
+        for regex in ROYALROAD_ANTI_THEFT_TEXT.iter().map(|s| {
+            let regex_str = format!(r#"<p class=".*">{}</p>"#, s);
+            Regex::new(&regex_str).unwrap()
+        }) {
+            txt = regex.replace(&txt, "").to_string();
+        }
+
+        // FIXME: don't use such a heavy-handed approach. Use Html parsing and not the
+        //        brute regex method.
+        txt = Regex::new(r#"<p class=".*">"#)
+            .unwrap()
+            .replace(&txt, "<p>")
+            .to_string();
+
+        let chapter_page = Html::parse_document(&txt);
         let chapter_title = chapter_page
             .select(&Selector::parse(CHAPTER_PAGE_TITLE_SELECTOR).unwrap())
             .next()
