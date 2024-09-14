@@ -235,4 +235,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Bug Fixes
 
  - <csr-id-f9307d20708bac6356413ae64ae2b398fdfd170e/> fix default Backend::get_chapters() implementation
-
