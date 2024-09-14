@@ -112,19 +112,26 @@
 //! for a commercial project.
 
 use std::collections::HashMap;
-use std::fmt::Display;
+use std::fmt::{Display, Formatter};
 use std::str::FromStr;
 
 use chrono::{DateTime, Utc};
 use getset::{CopyGetters, Getters, Setters};
 use log::{debug, trace};
 use scraper::{Html, Selector};
+use thiserror::Error;
+
+/// implementations of backends
+pub mod backends;
+pub use backends::{Backend, Backends};
+
+pub(crate) mod utils;
 
 /// A chapter of a webnovel
 #[derive(Debug, Getters, Setters, CopyGetters, Default, Clone, PartialEq)]
 pub struct Chapter {
     /// Index of this chapter in the grand scheme of things.
-    #[getset(get = "pub", set)]
+    #[getset(get = "pub", set = "pub")]
     index: usize,
     /// Title of this chapter, if any.
     #[getset(get = "pub", set)]
@@ -161,6 +168,27 @@ impl Chapter {
     /// Add a key/value pair to the chapter's metadata
     pub fn add_metadata(&mut self, key: impl Into<String>, value: impl Into<String>) {
         self.metadata.insert(key.into(), value.into());
+    }
+}
+
+/// Returned when parsing a chapter fails.
+#[derive(Debug, Error)]
+pub struct ChapterParseError {
+    message: String,
+}
+
+impl Display for ChapterParseError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.message)
+    }
+}
+
+impl ChapterParseError {
+    /// creates a new ChapterParseError from a given message.
+    pub fn new(message: impl Into<String>) -> Self {
+        Self {
+            message: message.into(),
+        }
     }
 }
 
@@ -206,7 +234,7 @@ impl Chapter {
 /// );
 /// ```
 impl FromStr for Chapter {
-    type Err = String;
+    type Err = ChapterParseError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let mut chapter = Chapter::default();
@@ -264,28 +292,28 @@ impl FromStr for Chapter {
             chapter_data
                 .get("index")
                 .and_then(|s| s.parse().ok())
-                .ok_or(format!(
+                .ok_or(ChapterParseError::new(format!(
                     "Invalid chapter index: {:?}",
                     chapter_data.get("index")
-                ))?,
+                )))?,
         );
         chapter.set_chapter_url(
             chapter_data
                 .get("chapter_url")
                 .map(|s| s.to_string())
-                .ok_or(format!(
+                .ok_or(ChapterParseError::new(format!(
                     "Invalid chapter url: {:?}",
                     chapter_data.get("chapter_url")
-                ))?,
+                )))?,
         );
         chapter.set_fiction_url(
             chapter_data
                 .get("fiction_url")
                 .map(|s| s.to_string())
-                .ok_or(format!(
+                .ok_or(ChapterParseError::new(format!(
                     "Invalid fiction url: {:?}",
                     chapter_data.get("fiction_url")
-                ))?,
+                )))?,
         );
         chapter.set_published_at(chapter_data.get("published_at").and_then(|s| {
             if s == "not_found" {
@@ -338,12 +366,6 @@ impl Display for Chapter {
         write!(f, "{}", s)
     }
 }
-
-/// implementations of backends
-pub mod backends;
-pub use backends::{Backend, Backends};
-
-pub(crate) mod utils;
 
 #[cfg(test)]
 mod tests {
