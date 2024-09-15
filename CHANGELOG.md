@@ -5,7 +5,60 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.4.1 (2024-09-15)
+
+### Chore
+
+ - <csr-id-b1c257fe7bb9c2ac312cb9dc0c40f9265581703c/> Exclude CHANGELOG from eof pre-commit hook.
+   Yeah, there's a trailing space on changelog generation, which blocks the release.
+ - <csr-id-a337c3a06c31f170c165b408fffc8c3d81a980bf/> update locked deps
+ - <csr-id-adccec54e668ac09231251110ff48f3a9eb2f0fa/> bump version
+ - <csr-id-9e4eba2103d4142e33c64fa51e61a0cbb2bc2b7e/> Add configuration for [pre-commit](https://pre-commit.com) support
+ - <csr-id-5f43f7ad5119daf37169dc02d4608b755bbdf108/> use map_err instead of or_else for RoyalRoad author parsing as per clippy suggestion
+
+### New Features
+
+ - <csr-id-5a76e30e2494778946d4928a7fa155f5a048d303/> refactor error types when parsing Chapter
+ - <csr-id-67ed3c0c2b2b2c83c7e9abe9019288ac16219224/> Use only one HTTP client
+   Use LazyLock for HTTP client to improve initialization. This reduces the overhead of creating a new client for each request by reusing a single instance, thus hopefully opening only one TCP connection. Maybe that will convince webnovel hosts that we are not a threat.
+
+### Bug Fixes
+
+ - <csr-id-6ce7fb90e4b138bf3c5268734212a891e163a5ca/> first draft of attempt to remove RR's added text when reading outside of their website.
+   It makes sense to prevent reading on other websites that steal content and present it as their own, much less for a local copy of something.
+ - <csr-id-504a0d2fe889e8a76159bb0e7d241dc0e55a9dd0/> Use usize instead of u32 for chapter count/indexes
+
+### Commit Statistics
+
+<csr-read-only-do-not-edit/>
+
+ - 9 commits contributed to the release.
+ - 4 days passed between releases.
+ - 9 commits were understood as [conventional](https://www.conventionalcommits.org).
+ - 0 issues like '(#ID)' were seen in commit messages
+
+### Commit Details
+
+<csr-read-only-do-not-edit/>
+
+<details><summary>view details</summary>
+
+ * **Uncategorized**
+    - Exclude CHANGELOG from eof pre-commit hook. (b1c257f)
+    - Update locked deps (a337c3a)
+    - Bump version (adccec5)
+    - Refactor error types when parsing Chapter (5a76e30)
+    - Use only one HTTP client (67ed3c0)
+    - Add configuration for [pre-commit](https://pre-commit.com) support (9e4eba2)
+    - First draft of attempt to remove RR's added text when reading outside of their website. (6ce7fb9)
+    - Use map_err instead of or_else for RoyalRoad author parsing as per clippy suggestion (5f43f7a)
+    - Use usize instead of u32 for chapter count/indexes (504a0d2)
+</details>
+
 ## v0.4.0 (2024-09-11)
+
+<csr-id-3e715a82a79415666c46698c07f8ece387b187d2/>
+<csr-id-eeb20604f7c59ba9b6be2a89325234487690c131/>
 
 ### Chore
 
@@ -20,7 +73,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <csr-read-only-do-not-edit/>
 
- - 3 commits contributed to the release.
+ - 4 commits contributed to the release.
  - 3 days passed between releases.
  - 3 commits were understood as [conventional](https://www.conventionalcommits.org).
  - 0 issues like '(#ID)' were seen in commit messages
@@ -32,6 +85,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <details><summary>view details</summary>
 
  * **Uncategorized**
+    - Release libwebnovel v0.4.0 (d3090f1)
     - Update README.md (3e715a8)
     - Bump version (eeb2060)
     - Add fiction cover image fetching (e9f73bd)
@@ -235,3 +289,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Bug Fixes
 
  - <csr-id-f9307d20708bac6356413ae64ae2b398fdfd170e/> fix default Backend::get_chapters() implementation
+
