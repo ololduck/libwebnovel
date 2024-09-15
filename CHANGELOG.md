@@ -5,7 +5,43 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.5.0 (2024-09-15)
+
+### Chore
+
+ - <csr-id-54fc1303eca5b44793583949e1c0ddb5a11730ec/> bump version
+
+### New Features
+
+ - <csr-id-aad742d4c9f9bc70e845ee11e89e36605c645569/> Add immutable_identifier method to backends.
+   This method returns something that won't change if the title of the novel changes.
+
+### Commit Statistics
+
+<csr-read-only-do-not-edit/>
+
+ - 2 commits contributed to the release.
+ - 2 commits were understood as [conventional](https://www.conventionalcommits.org).
+ - 0 issues like '(#ID)' were seen in commit messages
+
+### Commit Details
+
+<csr-read-only-do-not-edit/>
+
+<details><summary>view details</summary>
+
+ * **Uncategorized**
+    - Bump version (54fc130)
+    - Add immutable_identifier method to backends. (aad742d)
+</details>
+
 ## v0.4.1 (2024-09-15)
+
+<csr-id-b1c257fe7bb9c2ac312cb9dc0c40f9265581703c/>
+<csr-id-a337c3a06c31f170c165b408fffc8c3d81a980bf/>
+<csr-id-adccec54e668ac09231251110ff48f3a9eb2f0fa/>
+<csr-id-9e4eba2103d4142e33c64fa51e61a0cbb2bc2b7e/>
+<csr-id-5f43f7ad5119daf37169dc02d4608b755bbdf108/>
 
 ### Chore
 
@@ -32,7 +68,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <csr-read-only-do-not-edit/>
 
- - 9 commits contributed to the release.
+ - 10 commits contributed to the release.
  - 4 days passed between releases.
  - 9 commits were understood as [conventional](https://www.conventionalcommits.org).
  - 0 issues like '(#ID)' were seen in commit messages
@@ -44,6 +80,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <details><summary>view details</summary>
 
  * **Uncategorized**
+    - Release libwebnovel v0.4.1 (0a15e3a)
     - Exclude CHANGELOG from eof pre-commit hook. (b1c257f)
     - Update locked deps (a337c3a)
     - Bump version (adccec5)
