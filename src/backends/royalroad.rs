@@ -57,7 +57,7 @@ impl Default for RoyalRoad {
 impl Backend for RoyalRoad {
     fn get_backend_regexps() -> Vec<Regex> {
         vec![Regex::new(
-            r"https?://www\.royalroad\.com/fiction/(?<fiction_id>\d+)/(?<fiction_title_slug>\w+)",
+            r"https?://www\.royalroad\.com/fiction/(?<fiction_id>\d+)/(?<fiction_title_slug>[\w\-]+)",
         )
         .unwrap()]
     }
@@ -128,6 +128,32 @@ impl Backend for RoyalRoad {
             )));
         }
         Ok(title.unwrap())
+    }
+
+    /// ```rust
+    /// use libwebnovel::backends::RoyalRoad;
+    /// use libwebnovel::Backend;
+    /// let backend =
+    ///     RoyalRoad::new("https://www.royalroad.com/fiction/21220/mother-of-learning").unwrap();
+    /// assert_eq!(
+    ///     backend.immutable_identifier().unwrap(),
+    ///     "mother-of-learning-21220"
+    /// );
+    /// ```
+    fn immutable_identifier(&self) -> Result<String, BackendError> {
+        let regex = &Self::get_backend_regexps()[0];
+        let matches = regex.captures(&self.url);
+        if let Some(matches) = matches {
+            let fiction_id = matches.name("fiction_id").unwrap();
+            let fiction_title = matches.name("fiction_title_slug").unwrap();
+            Ok(format!(
+                "{}-{}",
+                fiction_title.as_str(),
+                fiction_id.as_str()
+            ))
+        } else {
+            Err(BackendError::ParseError("Unable to parse URL".to_string()))
+        }
     }
 
     fn url(&self) -> String {

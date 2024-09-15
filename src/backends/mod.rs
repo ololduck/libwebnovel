@@ -85,6 +85,9 @@ where
     fn new(url: &str) -> Result<Self, BackendError>;
     /// Returns the title of the fiction
     fn title(&self) -> Result<String, BackendError>;
+    /// Returns _something_ that can be used to identify this novel, and won't
+    /// change if (for instance) the title changes.
+    fn immutable_identifier(&self) -> Result<String, BackendError>;
     /// Returns the url of the fiction
     fn url(&self) -> String;
     /// Returns the fictions' cover URL, if any
@@ -272,6 +275,21 @@ impl Backend for Backends {
             Backends::LibRead(b) => b.title(),
             #[cfg(feature = "freewebnovel")]
             Backends::FreeWebNovel(b) => b.title(),
+        }
+    }
+
+    fn immutable_identifier(&self) -> Result<String, BackendError> {
+        match self {
+            // implement this on the model of self.title() please
+            Backends::Dumb => {
+                unimplemented!()
+            }
+            #[cfg(feature = "royalroad")]
+            Backends::RoyalRoad(b) => b.immutable_identifier(),
+            #[cfg(feature = "libread")]
+            Backends::LibRead(b) => b.immutable_identifier(),
+            #[cfg(feature = "freewebnovel")]
+            Backends::FreeWebNovel(b) => b.immutable_identifier(),
         }
     }
 

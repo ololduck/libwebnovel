@@ -94,6 +94,10 @@ impl Backend for LibRead {
         freewebnovel::title(&self.page)
     }
 
+    fn immutable_identifier(&self) -> Result<String, BackendError> {
+        Ok(self.url.split('/').last().unwrap().to_string())
+    }
+
     /// Returns the URL of the fiction
     /// ```rust
     /// use libwebnovel::backends::LibRead;
