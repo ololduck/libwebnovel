@@ -35,7 +35,7 @@ const ROYALROAD_ANTI_THEFT_TEXT: &[&str] = &[
 static ROYALROAD_ANTI_THEFT_REGEXPS: LazyLock<Vec<Regex>> = LazyLock::new(|| {
     ROYALROAD_ANTI_THEFT_TEXT
         .iter()
-        .map(|t| Regex::new(&format!(r#"<p class=".*">{}</p>"#, t)).unwrap())
+        .map(|t| Regex::new(&format!(r#"<p( class=".*")?>{}</p>"#, t)).unwrap())
         .collect()
 });
 
