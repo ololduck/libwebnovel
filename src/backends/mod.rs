@@ -46,10 +46,36 @@ pub enum BackendError {
     /// returned when we could not find the given index for a chapter
     #[error("Could not find chapter {0}")]
     UnknownChapter(usize),
+    /// We have attempted something on a chapter which required some information
+    /// that the chapter doesn't have. Most likely, this is something to report.
+    #[error("{msg} on Chapter {chapter_url}:", chapter_url=chapter.chapter_url())]
+    MissingChapterInformation {
+        /// A message identifying why this error has been returned
+        msg: String,
+        /// The [`Chapter`] the issue originated from
+        chapter: Box<Chapter>,
+    },
 }
 
 type ChapterOrderingFn = Box<dyn Fn(&Chapter, &Chapter) -> Ordering>;
-type ChapterListElem = (usize, String);
+pub(crate) type ChapterListElem = (usize, String);
+impl TryFrom<&Chapter> for ChapterListElem {
+    type Error = BackendError;
+
+    fn try_from(value: &Chapter) -> Result<Self, Self::Error> {
+        Ok((
+            value.index,
+            value
+                .title()
+                .as_ref()
+                .ok_or(BackendError::MissingChapterInformation {
+                    msg: "Could not find a valid title".to_string(),
+                    chapter: Box::new(value.clone()),
+                })?
+                .to_string(),
+        ))
+    }
+}
 
 /// Must be implemented by each backend.
 ///
