@@ -5,7 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.7.0 (2024-09-16)
+
+### New Features
+
+ - <csr-id-dc2ff98c787ad9d4150f2a89737cd686a555de09/> Add `From<&Chapter>` implementation to ChapterListElem
+   ChapterListElem is in reality a tuple (usize, String).
+   Also add a new variant to BackendError
+
+### Commit Statistics
+
+<csr-read-only-do-not-edit/>
+
+ - 1 commit contributed to the release.
+ - 1 commit was understood as [conventional](https://www.conventionalcommits.org).
+ - 0 issues like '(#ID)' were seen in commit messages
+
+### Commit Details
+
+<csr-read-only-do-not-edit/>
+
+<details><summary>view details</summary>
+
+ * **Uncategorized**
+    - Add `From<&Chapter>` implementation to ChapterListElem (dc2ff98)
+</details>
+
 ## v0.6.0 (2024-09-16)
+
+<csr-id-a6b39541556546f006421073cb045675236c0c78/>
 
 ### Chore
 
@@ -29,7 +57,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <csr-read-only-do-not-edit/>
 
- - 6 commits contributed to the release.
+ - 7 commits contributed to the release.
  - 6 commits were understood as [conventional](https://www.conventionalcommits.org).
  - 0 issues like '(#ID)' were seen in commit messages
 
@@ -40,6 +68,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <details><summary>view details</summary>
 
  * **Uncategorized**
+    - Release libwebnovel v0.6.0 (055223a)
     - Update README.md (a6b3954)
     - Add `get_chapter_list` to backends (0336e08)
     - Refactor freewebnovel selectors to use LazyLock for minor efficiency improvements. (014de27)
