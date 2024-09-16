@@ -1,7 +1,9 @@
 use regex::Regex;
 use scraper::Html;
 
-use crate::backends::{freewebnovel, Backend, BackendError, ChapterOrderingFn, FreeWebNovel};
+use crate::backends::{
+    freewebnovel, Backend, BackendError, ChapterListElem, ChapterOrderingFn, FreeWebNovel,
+};
 use crate::utils::get;
 use crate::Chapter;
 
@@ -146,6 +148,28 @@ impl Backend for LibRead {
     /// ```
     fn get_authors(&self) -> Result<Vec<String>, BackendError> {
         freewebnovel::authors(&self.page)
+    }
+
+    /// Returns the chapter list as available on the main fiction page
+    /// ```rust
+    /// use libwebnovel::backends::LibRead;
+    /// use libwebnovel::Backend;
+    /// let backend =
+    ///     LibRead::new("https://libread.com/libread/the-guide-to-conquering-earthlings-33024")
+    ///         .unwrap();
+    /// let chapter_lists = backend.get_chapter_list().unwrap();
+    /// let expected_tuples: &[(usize, &str)] = &[
+    ///     (1, "Chapter 1: 01"),
+    ///     (2, "Chapter 2: The 02"),
+    ///     (3, "Chapter 3: 03"),
+    /// ];
+    /// for (expected_index, expected_title) in expected_tuples {
+    ///     assert_eq!(chapter_lists[*expected_index - 1].0, *expected_index);
+    ///     assert_eq!(&chapter_lists[*expected_index - 1].1, expected_title);
+    /// }
+    /// ```
+    fn get_chapter_list(&self) -> Result<Vec<ChapterListElem>, BackendError> {
+        freewebnovel::get_chapter_list(&self.page)
     }
 
     /// returns a chapter

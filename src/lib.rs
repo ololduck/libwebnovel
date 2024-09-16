@@ -87,12 +87,14 @@
 //!   - [ ] suggestions?
 //! - [ ] implement an `async` version to get a better throughput. May be
 //!   important for images?
-//! - [ ] create a binary using this lib to save webnovels to disk. It may also
-//!   serve as a sample implementation?
+//! - [x] ~create a binary using this lib to save webnovels to disk. It may also
+//!   serve as a sample implementation?~ See [libwebnovel-storage](https://crates.io/crates/libwebnovel-storage)
 //! - [x] implement a way to get an [`Ordering`][std::cmp::Ordering] between
 //!   chapters. That enables us to detect collisions and still sort chapters
 //!   that may have their indexes altered, such as in the case of removal in the
 //!   source.
+//! - [x] Add a way to detect potential collisions without requesting each
+//!   individual chapter.
 //! - [x] Add a way to get the chapter url & parent fiction url from a given
 //!   chapter.
 //! - [x] ~maybe find a way to parse a chapter index/number as to not overwrite

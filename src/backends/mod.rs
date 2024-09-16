@@ -49,6 +49,7 @@ pub enum BackendError {
 }
 
 type ChapterOrderingFn = Box<dyn Fn(&Chapter, &Chapter) -> Ordering>;
+type ChapterListElem = (usize, String);
 
 /// Must be implemented by each backend.
 ///
@@ -96,11 +97,23 @@ where
     /// Returns a list of authors, if any
     fn get_authors(&self) -> Result<Vec<String>, BackendError>;
 
+    /// Returns a vector of available chapters _without requesting the chapters
+    /// themselves_. The goal is to be able to detect collisions between
+    /// something stored locally and a distant source.
+    ///
+    /// All vector elements must be a tuple `(chapter_index: usize,
+    /// chapter_title: String)`.
+    fn get_chapter_list(&self) -> Result<Vec<ChapterListElem>, BackendError>;
+
     /// Returns a single chapter. The chapter number need to be _unique_, as
     /// some webnovel platforms allow truncating the chapter list.
     fn get_chapter(&self, chapter_number: usize) -> Result<Chapter, BackendError>;
-    /// Must return the total chapter count
-    fn get_chapter_count(&self) -> Result<usize, BackendError>;
+
+    /// Must return the total chapter count. Default implementation calls
+    /// [`self.get_chapter_list().len()`][Backend::get_chapter_list()].
+    fn get_chapter_count(&self) -> Result<usize, BackendError> {
+        Ok(self.get_chapter_list()?.len())
+    }
 
     /// Returns all chapters for this fiction. The default implementation simply
     /// calls [`Self::get_chapter`] repeatedly
@@ -353,6 +366,20 @@ impl Backend for Backends {
             Backends::LibRead(b) => b.get_authors(),
             #[cfg(feature = "freewebnovel")]
             Backends::FreeWebNovel(b) => b.get_authors(),
+        }
+    }
+
+    fn get_chapter_list(&self) -> Result<Vec<ChapterListElem>, BackendError> {
+        match self {
+            Backends::Dumb => {
+                unimplemented!()
+            }
+            #[cfg(feature = "royalroad")]
+            Backends::RoyalRoad(b) => b.get_chapter_list(),
+            #[cfg(feature = "libread")]
+            Backends::LibRead(b) => b.get_chapter_list(),
+            #[cfg(feature = "freewebnovel")]
+            Backends::FreeWebNovel(b) => b.get_chapter_list(),
         }
     }
 

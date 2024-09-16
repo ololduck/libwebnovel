@@ -5,7 +5,7 @@ use regex::Regex;
 use reqwest::IntoUrl;
 use scraper::{Html, Selector};
 
-use crate::backends::{BackendError, ChapterOrderingFn};
+use crate::backends::{BackendError, ChapterListElem, ChapterOrderingFn};
 use crate::utils::get;
 use crate::{Backend, Chapter};
 
@@ -192,6 +192,28 @@ impl Backend for FreeWebNovel {
         authors(&self.page)
     }
 
+    /// Returns the chapter list as available on the main fiction page
+    /// ```rust
+    /// use libwebnovel::backends::FreeWebNovel;
+    /// use libwebnovel::Backend;
+    /// let backend =
+    ///     FreeWebNovel::new("https://freewebnovel.com/the-guide-to-conquering-earthlings.html")
+    ///         .unwrap();
+    /// let chapter_lists = backend.get_chapter_list().unwrap();
+    /// let expected_tuples: &[(usize, &str)] = &[
+    ///     (1, "Chapter 1: 01"),
+    ///     (2, "Chapter 2: The 02"),
+    ///     (3, "Chapter 3: 03"),
+    /// ];
+    /// for (expected_index, expected_title) in expected_tuples {
+    ///     assert_eq!(chapter_lists[*expected_index - 1].0, *expected_index);
+    ///     assert_eq!(&chapter_lists[*expected_index - 1].1, expected_title);
+    /// }
+    /// ```
+    fn get_chapter_list(&self) -> Result<Vec<ChapterListElem>, BackendError> {
+        get_chapter_list(&self.page)
+    }
+
     /// returns a chapter
     /// ```rust
     /// use libwebnovel::backends::FreeWebNovel;
@@ -300,6 +322,14 @@ pub(crate) fn authors(page: &Html) -> Result<Vec<String>, BackendError> {
     Ok(authors)
 }
 
+pub(crate) fn get_chapter_list(page: &Html) -> Result<Vec<ChapterListElem>, BackendError> {
+    Ok(page
+        .select(&CHAPTER_LIST_SELECTOR)
+        .enumerate()
+        .map(|(index, elem)| (index + 1, elem.attr("title").unwrap().to_string()))
+        .collect())
+}
+
 pub(crate) fn chapter_count(page: &Html) -> Result<usize, BackendError> {
     let chapter_links: Vec<String> = page
         .select(&CHAPTER_LIST_SELECTOR)
@@ -317,14 +347,29 @@ mod tests {
     use crate::backends::FreeWebNovel;
     use crate::{Backend, Chapter};
 
+    const TEST_URL: &str = "https://freewebnovel.com/the-guide-to-conquering-earthlings.html";
+
     #[test]
     fn test_chapter_to_string_and_back() {
-        let b =
-            FreeWebNovel::new("https://freewebnovel.com/the-guide-to-conquering-earthlings.html")
-                .unwrap();
+        let b = FreeWebNovel::new(TEST_URL).unwrap();
         let chapter = b.get_chapter(1).unwrap();
         let s = chapter.to_string();
         let chapter2 = Chapter::from_str(&s).unwrap();
         assert_eq!(chapter, chapter2);
+    }
+
+    #[test]
+    fn test_chapter_list_equality() {
+        let b = FreeWebNovel::new(TEST_URL).unwrap();
+        let chapters: Vec<Chapter> = (1..3)
+            .map(|index| b.get_chapter(index).unwrap())
+            .collect::<Vec<_>>();
+        let expected = b.get_chapter_list().unwrap();
+        for chapter in chapters {
+            assert_eq!(
+                chapter.title(),
+                &Some(expected[chapter.index - 1].1.clone())
+            )
+        }
     }
 }

@@ -6,7 +6,7 @@ use log::debug;
 use regex::Regex;
 use scraper::{Html, Selector};
 
-use crate::backends::{Backend, BackendError, ChapterOrderingFn};
+use crate::backends::{Backend, BackendError, ChapterListElem, ChapterOrderingFn};
 use crate::utils::get;
 use crate::Chapter;
 
@@ -237,6 +237,36 @@ impl Backend for RoyalRoad {
         Ok(authors)
     }
 
+    /// Returns the chapter list as available on the main fiction page
+    /// ```rust
+    /// use libwebnovel::backends::RoyalRoad;
+    /// use libwebnovel::Backend;
+    /// let backend =
+    ///     RoyalRoad::new("https://www.royalroad.com/fiction/21220/mother-of-learning").unwrap();
+    /// let chapter_lists = backend.get_chapter_list().unwrap();
+    /// let expected_tuples: &[(usize, &str)] = &[
+    ///     (1, "1. Good Morning Brother"),
+    ///     (2, "2. Life’s Little Problems"),
+    ///     (3, "3. The Bitter Truth"),
+    /// ];
+    /// for (expected_index, expected_title) in expected_tuples {
+    ///     assert_eq!(chapter_lists[*expected_index - 1].0, *expected_index);
+    ///     assert_eq!(&chapter_lists[*expected_index - 1].1, expected_title);
+    /// }
+    /// ```
+    fn get_chapter_list(&self) -> Result<Vec<ChapterListElem>, BackendError> {
+        let results = self
+            .fiction_page
+            .select(&CHAPTER_TITLE_SELECTOR)
+            .enumerate()
+            .map(|(index, elem)| {
+                let title = elem.inner_html().trim_matches('\n').trim().to_string();
+                (index + 1, title)
+            })
+            .collect();
+        Ok(results)
+    }
+
     fn get_chapter(&self, chapter_number: usize) -> Result<Chapter, BackendError> {
         if chapter_number == 0 {
             return Err(BackendError::UnknownChapter(chapter_number));
@@ -350,5 +380,20 @@ mod tests {
             Html::parse_fragment(&chapter.content),
             Html::parse_fragment(&chapter2.content)
         );
+    }
+
+    #[test]
+    fn test_chapter_equality() {
+        let b = RoyalRoad::new(TEST_URL).unwrap();
+        let chapters: Vec<Chapter> = (1..3)
+            .map(|index| b.get_chapter(index).unwrap())
+            .collect::<Vec<_>>();
+        let expected = b.get_chapter_list().unwrap();
+        for chapter in chapters {
+            assert_eq!(
+                chapter.title(),
+                &Some(expected[chapter.index - 1].1.clone())
+            )
+        }
     }
 }
