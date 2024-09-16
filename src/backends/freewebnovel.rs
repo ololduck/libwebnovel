@@ -1,3 +1,5 @@
+use std::sync::LazyLock;
+
 use log::debug;
 use regex::Regex;
 use reqwest::IntoUrl;
@@ -7,12 +9,18 @@ use crate::backends::{BackendError, ChapterOrderingFn};
 use crate::utils::get;
 use crate::{Backend, Chapter};
 
-const TITLE_SELECTOR: &str = "h1.tit";
-const AUTHORS_SELECTOR: &str = "a.a1";
-pub(crate) const CHAPTER_LIST_SELECTOR: &str = "div.m-newest2 ul#idData li a.con";
-const CHAPTER_TITLE_SELECTOR: &str = "div.top span.chapter";
-const CHAPTER_CONTENT_SELECTOR: &str = "div.txt div#article";
-const FICTION_COVER_IMAGE_URL_SELECTOR: &str = "meta[property='og:image']";
+pub(crate) static TITLE_SELECTOR: LazyLock<Selector> =
+    LazyLock::new(|| Selector::parse("h1.tit").unwrap());
+pub(crate) static AUTHORS_SELECTOR: LazyLock<Selector> =
+    LazyLock::new(|| Selector::parse("a.a1").unwrap());
+pub(crate) static CHAPTER_LIST_SELECTOR: LazyLock<Selector> =
+    LazyLock::new(|| Selector::parse("div.m-newest2 ul#idData li a.con").unwrap());
+pub(crate) static CHAPTER_TITLE_SELECTOR: LazyLock<Selector> =
+    LazyLock::new(|| Selector::parse("div.top span.chapter").unwrap());
+pub(crate) static CHAPTER_CONTENT_SELECTOR: LazyLock<Selector> =
+    LazyLock::new(|| Selector::parse("div.txt div#article").unwrap());
+pub(crate) static FICTION_COVER_IMAGE_URL_SELECTOR: LazyLock<Selector> =
+    LazyLock::new(|| Selector::parse("meta[property='og:image']").unwrap());
 
 /// An implementation of backend for [FreeWebNovel](https://freewebnovel.com)
 #[derive(Debug)]
@@ -200,10 +208,9 @@ impl Backend for FreeWebNovel {
         if chapter_number == 0 {
             return Err(BackendError::UnknownChapter(chapter_number));
         }
-        let chapter_list_selector = Selector::parse(CHAPTER_LIST_SELECTOR).unwrap();
         let chapter_url = self
             .page
-            .select(&chapter_list_selector)
+            .select(&CHAPTER_LIST_SELECTOR)
             .map(|select| select.attr("href").unwrap())
             .nth(chapter_number - 1)
             .ok_or(BackendError::UnknownChapter(chapter_number))?;
@@ -229,9 +236,8 @@ impl Backend for FreeWebNovel {
 }
 
 pub(crate) fn get_cover_url(page: &Html) -> Result<String, BackendError> {
-    let selector = Selector::parse(FICTION_COVER_IMAGE_URL_SELECTOR).unwrap();
     Ok(page
-        .select(&selector)
+        .select(&FICTION_COVER_IMAGE_URL_SELECTOR)
         .next()
         .ok_or(BackendError::ParseError(
             "Could not find cover url".to_string(),
@@ -250,10 +256,16 @@ pub(crate) fn get_chapter(url: impl IntoUrl) -> Result<Chapter, BackendError> {
         return Err(BackendError::RequestFailed(format!("{:?}", resp.status())));
     }
     let page = Html::parse_document(&resp.text()?);
-    let title_selector = Selector::parse(CHAPTER_TITLE_SELECTOR).unwrap();
-    let content_selector = Selector::parse(CHAPTER_CONTENT_SELECTOR).unwrap();
-    let chapter_title = page.select(&title_selector).next().unwrap().inner_html();
-    let chapter_content = page.select(&content_selector).next().unwrap().inner_html();
+    let chapter_title = page
+        .select(&CHAPTER_TITLE_SELECTOR)
+        .next()
+        .unwrap()
+        .inner_html();
+    let chapter_content = page
+        .select(&CHAPTER_CONTENT_SELECTOR)
+        .next()
+        .unwrap()
+        .inner_html();
     let mut chapter = Chapter::default();
     chapter.set_title(Some(chapter_title));
     chapter.set_chapter_url(url_str);
@@ -261,8 +273,10 @@ pub(crate) fn get_chapter(url: impl IntoUrl) -> Result<Chapter, BackendError> {
     Ok(chapter)
 }
 pub(crate) fn title(page: &Html) -> Result<String, BackendError> {
-    let selector = Selector::parse(TITLE_SELECTOR).unwrap();
-    let title = page.select(&selector).map(|sel| sel.inner_html()).next();
+    let title = page
+        .select(&TITLE_SELECTOR)
+        .map(|sel| sel.inner_html())
+        .next();
     debug!("title: {:?}", title);
     if title.is_none() {
         return Err(BackendError::ParseError(
@@ -273,9 +287,8 @@ pub(crate) fn title(page: &Html) -> Result<String, BackendError> {
 }
 
 pub(crate) fn authors(page: &Html) -> Result<Vec<String>, BackendError> {
-    let selector = Selector::parse(AUTHORS_SELECTOR).unwrap();
     let authors = page
-        .select(&selector)
+        .select(&AUTHORS_SELECTOR)
         .filter(|selection| {
             if let Some(href) = selection.attr("href") {
                 return href.starts_with("/author/") || href.starts_with("/authors/");
@@ -288,9 +301,8 @@ pub(crate) fn authors(page: &Html) -> Result<Vec<String>, BackendError> {
 }
 
 pub(crate) fn chapter_count(page: &Html) -> Result<usize, BackendError> {
-    let chapter_list_selector = Selector::parse(CHAPTER_LIST_SELECTOR).unwrap();
     let chapter_links: Vec<String> = page
-        .select(&chapter_list_selector)
+        .select(&CHAPTER_LIST_SELECTOR)
         .map(|select| select.attr("href").unwrap().to_string())
         .collect();
     Ok(chapter_links.len())

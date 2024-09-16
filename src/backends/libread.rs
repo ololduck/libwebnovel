@@ -1,5 +1,5 @@
 use regex::Regex;
-use scraper::{Html, Selector};
+use scraper::Html;
 
 use crate::backends::{freewebnovel, Backend, BackendError, ChapterOrderingFn, FreeWebNovel};
 use crate::utils::get;
@@ -164,10 +164,9 @@ impl Backend for LibRead {
         if chapter_number == 0 {
             return Err(BackendError::UnknownChapter(chapter_number));
         }
-        let chapter_list_selector = Selector::parse(freewebnovel::CHAPTER_LIST_SELECTOR).unwrap();
         let chapter_url = self
             .page
-            .select(&chapter_list_selector)
+            .select(&freewebnovel::CHAPTER_LIST_SELECTOR)
             .map(|select| select.attr("href").unwrap())
             .nth(chapter_number - 1)
             .ok_or(BackendError::UnknownChapter(chapter_number))?;
