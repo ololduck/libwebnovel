@@ -5,7 +5,52 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.6.0 (2024-09-16)
+
+### Chore
+
+ - <csr-id-a6b39541556546f006421073cb045675236c0c78/> Update README.md
+
+### New Features
+
+ - <csr-id-0336e08a1a27ba814303f2d79673a43709007bd6/> Add `get_chapter_list` to backends
+   This functions returns a `(index: usize, title: String)` tuple that can be used to compare chapters without making an individual request to each chapter. This is mainly useful to detect deletions on the source versus a local cache.
+ - <csr-id-014de273835b5b3164f623f4fabc9b71224660ab/> Refactor freewebnovel selectors to use LazyLock for minor efficiency improvements.
+ - <csr-id-5084ee58a871348abdd6d4ef04343ecea488c190/> Refactor RR's selectors for a minor efficiency improvement.
+   Less used CPU cycles are always better, right?
+ - <csr-id-6b84dd207182148e610aeb2c5d9f8a7689b984cd/> Build RR's regex list only once
+   This results in a very small, as in barely measurable, performance improvement.
+
+### Bug Fixes
+
+ - <csr-id-2302f81ee5a605eba06847c2bf98c17184c9f5d9/> don't assume RR's antitheft message have a <p> class.
+
+### Commit Statistics
+
+<csr-read-only-do-not-edit/>
+
+ - 6 commits contributed to the release.
+ - 6 commits were understood as [conventional](https://www.conventionalcommits.org).
+ - 0 issues like '(#ID)' were seen in commit messages
+
+### Commit Details
+
+<csr-read-only-do-not-edit/>
+
+<details><summary>view details</summary>
+
+ * **Uncategorized**
+    - Update README.md (a6b3954)
+    - Add `get_chapter_list` to backends (0336e08)
+    - Refactor freewebnovel selectors to use LazyLock for minor efficiency improvements. (014de27)
+    - Refactor RR's selectors for a minor efficiency improvement. (5084ee5)
+    - Don't assume RR's antitheft message have a <p> class. (2302f81)
+    - Build RR's regex list only once (6b84dd2)
+</details>
+
 ## v0.5.0 (2024-09-15)
+
+<csr-id-54fc1303eca5b44793583949e1c0ddb5a11730ec/>
 
 ### Chore
 
@@ -20,7 +65,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <csr-read-only-do-not-edit/>
 
- - 2 commits contributed to the release.
+ - 3 commits contributed to the release.
  - 2 commits were understood as [conventional](https://www.conventionalcommits.org).
  - 0 issues like '(#ID)' were seen in commit messages
 
@@ -31,6 +76,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <details><summary>view details</summary>
 
  * **Uncategorized**
+    - Release libwebnovel v0.5.0 (280f59b)
     - Bump version (54fc130)
     - Add immutable_identifier method to backends. (aad742d)
 </details>
