@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::sync::LazyLock;
 
 use chrono::DateTime;
 use log::debug;
@@ -30,6 +31,22 @@ const ROYALROAD_ANTI_THEFT_TEXT: &[&str] = &[
     "This content has been misappropriated from Royal Road; report any instances of this story if found elsewhere.",
     "Find this and other great novels on the author's preferred platform. Support original creators!"
 ];
+
+static ROYALROAD_ANTI_THEFT_REGEXPS: LazyLock<Vec<Regex>> = LazyLock::new(|| {
+    ROYALROAD_ANTI_THEFT_TEXT
+        .iter()
+        .map(|t| Regex::new(&format!(r#"<p class=".*">{}</p>"#, t)).unwrap())
+        .collect()
+});
+
+/// Used to identify a chapter URL
+static ROYALROAD_CHAPTER_URL_REGEX: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"https?://www\.royalroad\.com/fiction/(?<fiction_id>\d+)/(?<fiction_title_slug>[\w-]+)/chapter/(?<chapter_id>\d+)/(?<chapter_title_slug>[\w-]+)").unwrap()
+});
+
+/// Used to strip RR's weird paragraph CSS classes
+static ROYALROAD_P_REGEX: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r#"<p class=".*">"#).unwrap());
 
 /// A [`Backend`] implementation for [RoyalRoad](https://royalroad.com)
 #[derive(Debug)]
@@ -227,8 +244,7 @@ impl Backend for RoyalRoad {
             .nth(chapter_number - 1)
             .ok_or(BackendError::UnknownChapter(chapter_number))?;
         let chapter_url = format!("https://www.royalroad.com{}", chapter_url);
-        let chapter_url_regex = Regex::new(r"https?://www\.royalroad\.com/fiction/(?<fiction_id>\d+)/(?<fiction_title_slug>[\w-]+)/chapter/(?<chapter_id>\d+)/(?<chapter_title_slug>[\w-]+)").unwrap();
-        let matches = chapter_url_regex.captures(&chapter_url).unwrap();
+        let matches = ROYALROAD_CHAPTER_URL_REGEX.captures(&chapter_url).unwrap();
         let metadata = HashMap::from([
             (
                 "chapter_id".to_string(),
@@ -251,21 +267,14 @@ impl Backend for RoyalRoad {
             )));
         }
         // A bit of text transformation to get rid of RR's anti-theft added text
-        // FIXME: use a [`OnceCell`] or other to actually build the regexes only once.
         let mut txt = res.text()?;
-        for regex in ROYALROAD_ANTI_THEFT_TEXT.iter().map(|s| {
-            let regex_str = format!(r#"<p class=".*">{}</p>"#, s);
-            Regex::new(&regex_str).unwrap()
-        }) {
+        for regex in ROYALROAD_ANTI_THEFT_REGEXPS.iter() {
             txt = regex.replace(&txt, "").to_string();
         }
 
         // FIXME: don't use such a heavy-handed approach. Use Html parsing and not the
         //        brute regex method.
-        txt = Regex::new(r#"<p class=".*">"#)
-            .unwrap()
-            .replace(&txt, "<p>")
-            .to_string();
+        txt = ROYALROAD_P_REGEX.replace(&txt, "<p>").to_string();
 
         let chapter_page = Html::parse_document(&txt);
         let chapter_title = chapter_page
