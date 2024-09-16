@@ -10,14 +10,32 @@ use crate::backends::{Backend, BackendError, ChapterOrderingFn};
 use crate::utils::get;
 use crate::Chapter;
 
-const CHAPTER_TITLE_SELECTOR: &str = "table#chapters tbody tr.chapter-row td:first-child a";
-const CHAPTER_CREATED_AT_SELECTOR: &str = "table#chapters tbody tr.chapter-row td:last-child time";
-const FICTION_TITLE_SELECTOR: &str = "div.row.fic-header div.fic-title div.col h1.font-white";
-const FICTION_AUTHORS_SELECTOR: &str = "meta[property='books:author']";
-const CHAPTER_PAGE_TITLE_SELECTOR: &str = "div.row.fic-header div.row div h1.font-white";
-const CHAPTER_PAGE_CONTENT: &str =
-    "div.page-container div.page-content-wrapper div.page-content div.container.chapter-page div div div.portlet-body div.chapter-inner.chapter-content";
-const FICTION_IMAGE_URL_SELECTOR: &str = "meta[property='og:image']";
+/// Used to return the chapter's <a> in the fiction's chapter list
+static CHAPTER_TITLE_SELECTOR: LazyLock<Selector> = LazyLock::new(|| {
+    Selector::parse("table#chapters tbody tr.chapter-row td:first-child a").unwrap()
+});
+/// Used to return the date of the chapter in the fiction chapter's list
+static CHAPTER_CREATED_AT_SELECTOR: LazyLock<Selector> = LazyLock::new(|| {
+    Selector::parse("table#chapters tbody tr.chapter-row td:last-child time").unwrap()
+});
+/// Used to return the authors of the fiction
+static FICTION_AUTHORS_SELECTOR: LazyLock<Selector> =
+    LazyLock::new(|| Selector::parse("meta[property='books:author']").unwrap());
+/// Used to return the chapter's title on the chapter page
+static CHAPTER_PAGE_TITLE_SELECTOR: LazyLock<Selector> =
+    LazyLock::new(|| Selector::parse("div.row.fic-header div.row div h1.font-white").unwrap());
+/// Used to return the chapter content on the chapter page
+static CHAPTER_PAGE_CONTENT: LazyLock<Selector> = LazyLock::new(|| {
+    Selector::parse("div.page-container div.page-content-wrapper div.page-content div.container.chapter-page div div div.portlet-body div.chapter-inner.chapter-content").unwrap()
+});
+/// Used to get the fiction's title on the main fiction page
+static FICTION_TITLE_SELECTOR: LazyLock<Selector> = LazyLock::new(|| {
+    Selector::parse("div.row.fic-header div.fic-title div.col h1.font-white").unwrap()
+});
+
+/// Used to return the fiction's cover image
+static FICTION_IMAGE_URL_SELECTOR: LazyLock<Selector> =
+    LazyLock::new(|| Selector::parse("meta[property='og:image']").unwrap());
 
 /// This is text added to RoyalRoad (RR) chapters when reading them outside of
 /// RR's website (i guess). I think it is better to remove them since it
@@ -131,10 +149,9 @@ impl Backend for RoyalRoad {
     }
 
     fn title(&self) -> Result<String, BackendError> {
-        let selector = Selector::parse(FICTION_TITLE_SELECTOR).unwrap();
         let title = self
             .fiction_page
-            .select(&selector)
+            .select(&FICTION_TITLE_SELECTOR)
             .map(|selection| selection.inner_html())
             .next();
         debug!("Got title: {:?}", title);
@@ -188,10 +205,9 @@ impl Backend for RoyalRoad {
     /// assert_eq!(cover_url, "https://www.royalroadcdn.com/public/covers-full/21220-mother-of-learning.jpg?time=1637247458");
     /// ```
     fn cover_url(&self) -> Result<String, BackendError> {
-        let selector = Selector::parse(FICTION_IMAGE_URL_SELECTOR).unwrap();
         let img_url = self
             .fiction_page
-            .select(&selector)
+            .select(&FICTION_IMAGE_URL_SELECTOR)
             .next()
             .ok_or(BackendError::ParseError(
                 "Could not find fiction cover image url".to_string(),
@@ -204,10 +220,9 @@ impl Backend for RoyalRoad {
     }
 
     fn get_authors(&self) -> Result<Vec<String>, BackendError> {
-        let selector = Selector::parse(FICTION_AUTHORS_SELECTOR).unwrap();
         let authors : Result<Vec<String>, BackendError>=
             self.fiction_page
-                .select(&selector)
+                .select(&FICTION_AUTHORS_SELECTOR)
                 .map(|selection| selection.attr("content").ok_or_else(|| BackendError::ParseError("Failed to find 'content' attribute while looking at <meta property='books:author'>".to_string())).map(|s| s.to_string())).collect();
 
         let authors = authors.map_err(|e| {
@@ -226,20 +241,17 @@ impl Backend for RoyalRoad {
         if chapter_number == 0 {
             return Err(BackendError::UnknownChapter(chapter_number));
         }
-        // Create the CSS selectors
-        let chapter_href_selector = Selector::parse(CHAPTER_TITLE_SELECTOR).unwrap();
-        let chapter_date_selector = Selector::parse(CHAPTER_CREATED_AT_SELECTOR).unwrap();
         // Get che chapter URL
         let chapter_url = self
             .fiction_page
-            .select(&chapter_href_selector)
+            .select(&CHAPTER_TITLE_SELECTOR)
             .map(|select| select.attr("href").unwrap().to_string())
             .nth(chapter_number - 1)
             .ok_or(BackendError::UnknownChapter(chapter_number))?;
         // Get the chapter publication date
         let chapter_date = self
             .fiction_page
-            .select(&chapter_date_selector)
+            .select(&CHAPTER_CREATED_AT_SELECTOR)
             .map(|select| DateTime::parse_from_rfc3339(select.attr("datetime").unwrap()))
             .nth(chapter_number - 1)
             .ok_or(BackendError::UnknownChapter(chapter_number))?;
@@ -278,14 +290,14 @@ impl Backend for RoyalRoad {
 
         let chapter_page = Html::parse_document(&txt);
         let chapter_title = chapter_page
-            .select(&Selector::parse(CHAPTER_PAGE_TITLE_SELECTOR).unwrap())
+            .select(&CHAPTER_PAGE_TITLE_SELECTOR)
             .next()
             .unwrap()
             .inner_html()
             .trim_matches(&['\n', ' '])
             .to_string();
         let chapter_content = chapter_page
-            .select(&Selector::parse(CHAPTER_PAGE_CONTENT).unwrap())
+            .select(&CHAPTER_PAGE_CONTENT)
             .next()
             .unwrap()
             .inner_html()
@@ -302,10 +314,9 @@ impl Backend for RoyalRoad {
     }
 
     fn get_chapter_count(&self) -> Result<usize, BackendError> {
-        let chapter_href_selector = Selector::parse(CHAPTER_TITLE_SELECTOR).unwrap();
         let chapter_urls: Vec<String> = self
             .fiction_page
-            .select(&chapter_href_selector)
+            .select(&CHAPTER_TITLE_SELECTOR)
             .map(|select| select.attr("href").unwrap().to_string())
             .collect();
         Ok(chapter_urls.len())
