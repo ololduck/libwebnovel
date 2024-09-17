@@ -387,10 +387,11 @@ impl Display for Chapter {
                 "not_found".to_string()
             }
         ));
-
-        s.push_str("metadata:\n");
-        for (key, value) in &self.metadata {
-            s.push_str(&format!("  {}: {}\n", key, value));
+        if !self.metadata.is_empty() {
+            s.push_str("metadata:\n");
+            for (key, value) in &self.metadata {
+                s.push_str(&format!("  {}: {}\n", key, value));
+            }
         }
         s.push_str("-->\n");
         if let Some(title) = &self.title {
@@ -459,5 +460,19 @@ mod tests {
         let s = chapter.to_string();
         let chapter_2 = Chapter::from_str(&s).unwrap();
         assert_eq!(chapter, chapter_2);
+    }
+
+    #[test]
+    fn test_chapter_no_metadata() {
+        let mut chapter = Chapter::default();
+        chapter.set_title(Some("title".to_string()));
+        chapter.set_chapter_url("https://chapter.url/".to_string());
+        chapter.set_fiction_url("https://fiction.url".to_string());
+        chapter.set_index(1);
+        chapter.published_at = None;
+        chapter.set_content("<p>content</>".to_string());
+        assert_eq!(chapter.metadata.len(), 0);
+        let s = chapter.to_string();
+        assert!(!s.contains("metadata:"));
     }
 }
