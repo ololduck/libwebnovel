@@ -114,7 +114,7 @@
 //! for a commercial project.
 
 use std::collections::HashMap;
-use std::fmt::{Display, Formatter};
+use std::fmt::{Debug, Display, Formatter};
 use std::str::FromStr;
 
 use chrono::{DateTime, Utc};
@@ -130,7 +130,7 @@ pub use backends::{Backend, Backends};
 pub(crate) mod utils;
 
 /// A chapter of a webnovel
-#[derive(Debug, Getters, Setters, CopyGetters, Default, Clone, PartialEq)]
+#[derive(Getters, Setters, CopyGetters, Default, Clone, PartialEq)]
 pub struct Chapter {
     /// Index of this chapter in the grand scheme of things.
     #[getset(get = "pub", set = "pub")]
@@ -153,6 +153,41 @@ pub struct Chapter {
     /// Arbitrary metadata added by the backend.
     #[getset(get = "pub", set)]
     metadata: HashMap<String, String>,
+}
+
+impl Debug for Chapter {
+    #[allow(unused_variables, dead_code)]
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        #[derive(Debug)]
+        struct Chapter<'a> {
+            index: &'a usize,
+            title: &'a Option<String>,
+            chapter_url: &'a String,
+            fiction_url: &'a String,
+            published_at: &'a Option<DateTime<Utc>>,
+            metadata: &'a HashMap<String, String>,
+        }
+        let Self {
+            index,
+            title,
+            content: _,
+            chapter_url,
+            fiction_url,
+            published_at,
+            metadata,
+        } = self;
+        Debug::fmt(
+            &Chapter {
+                index,
+                title,
+                chapter_url,
+                fiction_url,
+                published_at,
+                metadata,
+            },
+            f,
+        )
+    }
 }
 
 impl Chapter {

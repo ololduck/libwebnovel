@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::fmt::{Debug, Formatter};
 use std::sync::LazyLock;
 
 use chrono::DateTime;
@@ -67,7 +68,6 @@ static ROYALROAD_P_REGEX: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r#"<p class=".*">"#).unwrap());
 
 /// A [`Backend`] implementation for [RoyalRoad](https://royalroad.com)
-#[derive(Debug)]
 pub struct RoyalRoad {
     url: String,
     fiction_page: Html,
@@ -78,6 +78,21 @@ impl Default for RoyalRoad {
             url: "".to_string(),
             fiction_page: Html::new_document(),
         }
+    }
+}
+
+#[allow(unused_variables, dead_code)]
+impl Debug for RoyalRoad {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        #[derive(Debug)]
+        struct Royalroad<'a> {
+            url: &'a String,
+        }
+        let Self {
+            url,
+            fiction_page: _,
+        } = self;
+        Debug::fmt(&Royalroad { url }, f)
     }
 }
 

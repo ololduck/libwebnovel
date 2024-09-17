@@ -1,3 +1,4 @@
+use std::fmt::{Debug, Formatter};
 use std::sync::LazyLock;
 
 use log::debug;
@@ -23,10 +24,21 @@ pub(crate) static FICTION_COVER_IMAGE_URL_SELECTOR: LazyLock<Selector> =
     LazyLock::new(|| Selector::parse("meta[property='og:image']").unwrap());
 
 /// An implementation of backend for [FreeWebNovel](https://freewebnovel.com)
-#[derive(Debug)]
 pub struct FreeWebNovel {
     url: String,
     page: Html,
+}
+
+#[allow(unused_variables, dead_code)]
+impl Debug for FreeWebNovel {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        #[derive(Debug)]
+        struct FreeWebNovel<'a> {
+            url: &'a String,
+        }
+        let Self { url, page: _ } = self;
+        Debug::fmt(&FreeWebNovel { url }, f)
+    }
 }
 impl Default for FreeWebNovel {
     fn default() -> Self {

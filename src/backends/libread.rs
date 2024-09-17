@@ -1,3 +1,5 @@
+use std::fmt::{Debug, Formatter};
+
 use regex::Regex;
 use scraper::Html;
 
@@ -8,11 +10,23 @@ use crate::utils::get;
 use crate::Chapter;
 
 /// A backend using [libread](https://libread.com). Honestly i don't know why i bothered with it, since i'm under the impression that most chapters redirect to [FreeWebNovel](https://freewebnovel.com).
-#[derive(Debug)]
 pub struct LibRead {
     url: String,
     page: Html,
 }
+
+#[allow(unused_variables, dead_code)]
+impl Debug for LibRead {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        #[derive(Debug)]
+        struct LibRead<'a> {
+            url: &'a String,
+        }
+        let Self { url, page: _ } = self;
+        Debug::fmt(&LibRead { url }, f)
+    }
+}
+
 impl Default for LibRead {
     fn default() -> Self {
         Self {
