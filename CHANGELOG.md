@@ -5,6 +5,41 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.7.1 (2024-09-17)
+
+### Chore
+
+ - <csr-id-1f0ac3e3d339acfa14f4c0abb0ef9811b67205ce/> bump version
+
+### New Features
+
+ - <csr-id-826f0a7442256100136b95f5f83712a686431b71/> Add custom Debug implementation for various structs to reduce un-needed verbosity.
+
+### Bug Fixes
+
+ - <csr-id-9cab6812f16e848e95da02ec6ddfaa276c673d06/> don't serialize chapter metadata key if none is present
+
+### Commit Statistics
+
+<csr-read-only-do-not-edit/>
+
+ - 3 commits contributed to the release.
+ - 1 day passed between releases.
+ - 3 commits were understood as [conventional](https://www.conventionalcommits.org).
+ - 0 issues like '(#ID)' were seen in commit messages
+
+### Commit Details
+
+<csr-read-only-do-not-edit/>
+
+<details><summary>view details</summary>
+
+ * **Uncategorized**
+    - Bump version (1f0ac3e)
+    - Don't serialize chapter metadata key if none is present (9cab681)
+    - Add custom Debug implementation for various structs to reduce un-needed verbosity. (826f0a7)
+</details>
+
 ## v0.7.0 (2024-09-16)
 
 ### New Features
@@ -17,7 +52,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <csr-read-only-do-not-edit/>
 
- - 1 commit contributed to the release.
+ - 2 commits contributed to the release.
  - 1 commit was understood as [conventional](https://www.conventionalcommits.org).
  - 0 issues like '(#ID)' were seen in commit messages
 
@@ -28,6 +63,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <details><summary>view details</summary>
 
  * **Uncategorized**
+    - Release libwebnovel v0.7.0 (7c0daff)
     - Add `From<&Chapter>` implementation to ChapterListElem (dc2ff98)
 </details>
 
