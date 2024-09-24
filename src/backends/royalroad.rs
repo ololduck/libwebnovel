@@ -151,11 +151,11 @@ impl Backend for RoyalRoad {
     fn new(url: &str) -> Result<Self, BackendError> {
         let req = get(url)?;
         if !req.status().is_success() {
-            return Err(BackendError::RequestFailed(format!(
-                "{}: {}",
-                req.status(),
-                req.text()?
-            )));
+            return Err(BackendError::RequestFailed {
+                message: format!("Could not get fiction URL {url}"),
+                status: req.status(),
+                content: req.text()?,
+            });
         }
         Ok(Self {
             url: url.to_string(),
@@ -316,12 +316,14 @@ impl Backend for RoyalRoad {
         debug!("Attempting to get chapter {chapter_url}");
         let res = get(&chapter_url)?;
         if !res.status().is_success() {
-            return Err(BackendError::RequestFailed(format!(
-                "failed to get chapter {} from {}: {}",
-                chapter_number,
-                &chapter_url,
-                res.text()?
-            )));
+            return Err(BackendError::RequestFailed {
+                message: format!(
+                    "failed to get chapter {} from {}",
+                    chapter_number, &chapter_url,
+                ),
+                status: res.status(),
+                content: res.text()?,
+            });
         }
         // A bit of text transformation to get rid of RR's anti-theft added text
         let mut txt = res.text()?;

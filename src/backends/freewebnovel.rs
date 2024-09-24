@@ -125,11 +125,11 @@ impl Backend for FreeWebNovel {
     fn new(url: &str) -> Result<Self, BackendError> {
         let req = get(url)?;
         if !req.status().is_success() {
-            return Err(BackendError::RequestFailed(format!(
-                "{}: {}",
-                req.status(),
-                req.text()?
-            )));
+            return Err(BackendError::RequestFailed {
+                message: format!("Could not fetch url {url}"),
+                status: req.status(),
+                content: req.text()?,
+            });
         }
         Ok(Self {
             url: url.to_string(),
@@ -287,7 +287,11 @@ pub(crate) fn get_chapter(url: impl IntoUrl) -> Result<Chapter, BackendError> {
     let url_str = url.into_url()?.to_string();
     let resp = get(&url_str)?;
     if !resp.status().is_success() {
-        return Err(BackendError::RequestFailed(format!("{:?}", resp.status())));
+        return Err(BackendError::RequestFailed {
+            message: format!("Could not get chapter at URL {url_str}"),
+            status: resp.status(),
+            content: resp.text()?,
+        });
     }
     let page = Html::parse_document(&resp.text()?);
     let chapter_title = page

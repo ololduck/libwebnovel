@@ -93,11 +93,11 @@ impl Backend for LibRead {
     fn new(url: &str) -> Result<Self, BackendError> {
         let req = get(url)?;
         if !req.status().is_success() {
-            return Err(BackendError::RequestFailed(format!(
-                "{}: {}",
-                req.status(),
-                req.text()?
-            )));
+            return Err(BackendError::RequestFailed {
+                message: format!("Could not fetch url {url}"),
+                status: req.status(),
+                content: req.text()?,
+            });
         }
         Ok(Self {
             url: url.to_string(),

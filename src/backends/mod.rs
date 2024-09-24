@@ -2,6 +2,7 @@ use std::cmp::Ordering;
 use std::fmt::Debug;
 
 use regex::Regex;
+use reqwest::StatusCode;
 use strum::{EnumCount, EnumIter, IntoEnumIterator};
 
 #[cfg(feature = "freewebnovel")]
@@ -35,8 +36,15 @@ pub enum BackendError {
     UrlNotFound,
     /// Used when [`reqwest::Response::status()`] returns something else than
     /// success
-    #[error("We could not access the fiction page: {0}")]
-    RequestFailed(String),
+    #[error("We could not access the fiction page: {message}: {status}: {content}")]
+    RequestFailed {
+        /// A message describing the error
+        message: String,
+        /// Status code of the response to the failed request
+        status: StatusCode,
+        /// Content of the response's body as text
+        content: String,
+    },
     /// An error while parsing the fiction
     #[error("An error occured while parsing the fiction page: {0}")]
     ParseError(String),
@@ -156,10 +164,11 @@ where
     fn cover(&self) -> Result<Vec<u8>, BackendError> {
         let resp = get(self.cover_url()?)?;
         if !resp.status().is_success() {
-            return Err(BackendError::RequestFailed(format!(
-                "Could not download cover image: {}",
-                resp.status()
-            )));
+            return Err(BackendError::RequestFailed {
+                message: "Could not download cover image".to_string(),
+                status: resp.status(),
+                content: resp.text()?,
+            });
         }
         let image_bytes = resp.bytes()?;
         Ok(image_bytes.to_vec())

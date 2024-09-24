@@ -4,7 +4,7 @@ description = "A Rust crate enabling users to get chapters of a webnovel, with m
 homepage = "https://codeberg.org/paulollivier/libwebnovel"
 repository = "https://codeberg.org/paulollivier/libwebnovel"
 authors = ["Paul Ollivier <contact@paulollivier.fr>"]
-version = "0.7.1"
+version = "0.8.0"
 edition = "2021"
 license = "AGPL-3.0-or-later"
 readme = "README.md"
@@ -40,7 +40,7 @@ log = "0.4.22"
 strum = { version = "0.26.3", features = ["derive"] }
 
 # Backends deps
-reqwest = { version = "0.12.7", features = ["blocking"], optional = true }
+reqwest = { version = "0.12.7", features = ["blocking", "gzip"], optional = true }
 scraper = { version = "0.20.0", optional = true }
 
 
