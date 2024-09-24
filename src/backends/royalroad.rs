@@ -46,15 +46,14 @@ static FICTION_IMAGE_URL_SELECTOR: LazyLock<Selector> =
 /// spirit of these additions?
 /// On other news, if find it nice from RR to put this, from an author
 /// standpoint.
-const ROYALROAD_ANTI_THEFT_TEXT: &[&str] = &[
-    "This content has been misappropriated from Royal Road; report any instances of this story if found elsewhere.",
-    "Find this and other great novels on the author's preferred platform. Support original creators!"
-];
+const ROYALROAD_ANTI_THEFT_TEXT: &str =
+    include_str!("../../ressources/royalroad/known_anti-theft_sentences.txt");
 
-static ROYALROAD_ANTI_THEFT_REGEXPS: LazyLock<Vec<Regex>> = LazyLock::new(|| {
+static ROYALROAD_ANTI_THEFT_TEXT_ARRAY: LazyLock<Vec<String>> = LazyLock::new(|| {
     ROYALROAD_ANTI_THEFT_TEXT
-        .iter()
-        .map(|t| Regex::new(&format!(r#"<p( class=".*")?>{}</p>"#, t)).unwrap())
+        .lines()
+        .filter(|s| !s.is_empty())
+        .map(|t| format!(r#"<p>{}</p>"#, t))
         .collect()
 });
 
@@ -327,13 +326,11 @@ impl Backend for RoyalRoad {
         }
         // A bit of text transformation to get rid of RR's anti-theft added text
         let mut txt = res.text()?;
-        for regex in ROYALROAD_ANTI_THEFT_REGEXPS.iter() {
-            txt = regex.replace(&txt, "").to_string();
+        for anti_theft_text in ROYALROAD_ANTI_THEFT_TEXT_ARRAY.iter() {
+            txt = txt.replace(anti_theft_text, "").to_string();
         }
 
-        // FIXME: don't use such a heavy-handed approach. Use Html parsing and not the
-        //        brute regex method.
-        txt = ROYALROAD_P_REGEX.replace(&txt, "<p>").to_string();
+        let txt = ROYALROAD_P_REGEX.replace_all(&txt, "<p>").to_string();
 
         let chapter_page = Html::parse_document(&txt);
         let chapter_title = chapter_page
