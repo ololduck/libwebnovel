@@ -5,6 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.8.1 (2024-09-24)
+
+### Chore
+
+ - <csr-id-6e242e6296bcf83f31d16b13a80b79cfd107fa9a/> Update README.md
+
+### New Features
+
+ - <csr-id-3344312f153cbbde43ed4d81943874a8b1171bf0/> Improve RR anti-theft text removal
+
+### Commit Statistics
+
+<csr-read-only-do-not-edit/>
+
+ - 2 commits contributed to the release.
+ - 2 commits were understood as [conventional](https://www.conventionalcommits.org).
+ - 0 issues like '(#ID)' were seen in commit messages
+
+### Commit Details
+
+<csr-read-only-do-not-edit/>
+
+<details><summary>view details</summary>
+
+ * **Uncategorized**
+    - Update README.md (6e242e6)
+    - Improve RR anti-theft text removal (3344312)
+</details>
+
 ## v0.8.0 (2024-09-24)
 
 ### New Features
@@ -15,7 +44,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <csr-read-only-do-not-edit/>
 
- - 1 commit contributed to the release.
+ - 2 commits contributed to the release.
  - 6 days passed between releases.
  - 1 commit was understood as [conventional](https://www.conventionalcommits.org).
  - 0 issues like '(#ID)' were seen in commit messages
@@ -27,6 +56,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <details><summary>view details</summary>
 
  * **Uncategorized**
+    - Release libwebnovel v0.8.0 (e5312d2)
     - Implement retry logic with fibonacci backoff for HTTP requests (limited to 60s wait) (bbe3805)
 </details>
 
