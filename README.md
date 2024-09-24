@@ -8,6 +8,12 @@ webnovel hosting sites and be able to get their contents.
 Since there are times we don't have Internet access, such as when riding
 some trains, downloading to disk in a convenient format seems the way to go.
 
+**BY USING THIS CRATE/LIBRARY YOU HEREBY PLEDGE TO NOT PROFIT OF THE
+DOWNLOADED FICTIONS IN ANY WAY, OR, BY YOUR ACTION, MAKE AN OTHER ENTITY
+PROFIT IN ANY WAY FROM THE DOWNLOADED FICTIONS**. This is serious, this
+crate is intended for reading comfort, _not_ to enable people to be
+arseholes.
+
 ### Example
 Say you want to create a software that will generate epubs from a given
 fiction url. This could be expressed by something like the following:
@@ -40,7 +46,7 @@ fn write_chapters_to_epub(writer: &impl Write, chapters: &[Chapter]) -> Result<(
 
 See [`Backends`] for more information on how to use the library. The
 documentation of the [`Backend`] trait may also be useful, especially if you
-want to implement an other backend (don't forget to share it with the [main repository](https://codeberg.org/paulollivier/libwebnovel)!).
+want to implement another backend (don't forget to share it with the [main repository](https://codeberg.org/paulollivier/libwebnovel)!).
 
 ### Supported providers
 
@@ -63,6 +69,31 @@ if you want all features, including the default ones:
 [dependencies]
 libwebnovel = {version="*", features = ["all"]}
 ```
+
+#### A note on Royal Road
+
+RoyalRoad adds anti-theft text when getting chapters outside their
+website. This is good to tackle malicious individuals seeking to profit of
+someone else's work, but quite bad when downloading chapters for your
+offline perusing, so this crates removes them. This is done by a helper
+program, repeatedly requesting a chapter and comparing what text changes.
+The list of changes is then saved to a file on the repository, which is
+later included at build-time.
+
+I have been running this helper binary to generate a list that did not seem
+to grow any more, but RR may add more sentences in the future. If you spot
+one of those, you can open an issue.
+
+If you want to publish a merge request, that's even better, here's how to
+run the helper script:
+
+```txt
+$ cargo run --features=helper_scripts --bin=rr-gen-anti-theft-list
+```
+
+You can then commit the resulting
+`ressources/royalroad/known_anti-theft_sentences.txt` and send a merge
+request.
 
 ### Crate features / Task list
 
