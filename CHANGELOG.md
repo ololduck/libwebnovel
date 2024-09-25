@@ -5,7 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.9.1 (2024-09-25)
+
+### Bug Fixes
+
+ - <csr-id-afe660118e53972b24e850a11bf5c88a7d08cfa3/> exclude "exY" chapters from chapter listing for lightnovelworld
+   Turns out light novel world sometimes has extra chapters name "ex{int}" for extra chapters, such as artworks and others. Filter those out.
+
+### Commit Statistics
+
+<csr-read-only-do-not-edit/>
+
+ - 1 commit contributed to the release.
+ - 1 commit was understood as [conventional](https://www.conventionalcommits.org).
+ - 0 issues like '(#ID)' were seen in commit messages
+
+### Commit Details
+
+<csr-read-only-do-not-edit/>
+
+<details><summary>view details</summary>
+
+ * **Uncategorized**
+    - Exclude "exY" chapters from chapter listing for lightnovelworld (afe6601)
+</details>
+
 ## v0.9.0 (2024-09-25)
+
+<csr-id-b70182822e4fd25c0343bc69f59735000b1e1ca0/>
+<csr-id-0064cea55d356a013ad4c44d450f9b7f1f27eb8a/>
 
 ### Chore
 
@@ -20,7 +48,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <csr-read-only-do-not-edit/>
 
- - 3 commits contributed to the release.
+ - 4 commits contributed to the release.
  - 1 day passed between releases.
  - 3 commits were understood as [conventional](https://www.conventionalcommits.org).
  - 0 issues like '(#ID)' were seen in commit messages
@@ -32,6 +60,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <details><summary>view details</summary>
 
  * **Uncategorized**
+    - Release libwebnovel v0.9.0 (b694bcb)
     - Update README.md (b701828)
     - Add support for lightnovelworld.com (4c52b70)
     - Fix clippy warnings (0064cea)
