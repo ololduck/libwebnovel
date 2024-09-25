@@ -61,6 +61,7 @@
 //! - [RoyalRoad](https://www.royalroad.com/)
 //! - [FreeWebNovel](https://freewebnovel.com/)
 //! - [LibRead](https://libread.com/)
+//! - [lightnovelworld](https://www.lightnovelworld.com/)
 //!
 //! ## Cargo features
 //!
@@ -115,6 +116,7 @@
 //!   - [x] libread
 //!   - [x] freewebnovel
 //!   - [x] royalroad
+//!   - [x] lightnovelworld
 //!   - [ ] scribblehub - May be complicated because of cloudflare
 //!   - [ ] suggestions?
 //! - [ ] implement an `async` version to get a better throughput. May be

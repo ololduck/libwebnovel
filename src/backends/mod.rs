@@ -9,6 +9,8 @@ use strum::{EnumCount, EnumIter, IntoEnumIterator};
 pub use crate::backends::freewebnovel::FreeWebNovel;
 #[cfg(feature = "libread")]
 pub use crate::backends::libread::LibRead;
+#[cfg(feature = "lightnovelworld")]
+pub use crate::backends::lightnovelworld::LightNovelWorld;
 #[cfg(feature = "royalroad")]
 pub use crate::backends::royalroad::RoyalRoad;
 use crate::utils::get;
@@ -21,6 +23,9 @@ mod royalroad;
 
 #[cfg(feature = "freewebnovel")]
 mod freewebnovel;
+
+#[cfg(feature = "lightnovelworld")]
+mod lightnovelworld;
 
 /// An error that may be returned when the backend encounters an error
 #[derive(thiserror::Error, Debug)]
@@ -115,7 +120,9 @@ where
     /// Returns a function enabling chapter ordering. This is important to
     /// ensure that chapters may still be correctly sorted when the source
     /// chapters have been removed.
-    fn get_ordering_function() -> ChapterOrderingFn;
+    fn get_ordering_function() -> ChapterOrderingFn {
+        Box::new(|c1: &Chapter, c2: &Chapter| c1.published_at().cmp(c2.published_at()))
+    }
     /// Creates a new instance of itself
     fn new(url: &str) -> Result<Self, BackendError>;
     /// Returns the title of the fiction
@@ -192,6 +199,9 @@ pub enum Backends {
     #[cfg(feature = "freewebnovel")]
     /// A FreeWebNovel backend
     FreeWebNovel(FreeWebNovel),
+    /// A LightNovelWorld backend
+    #[cfg(feature = "lightnovelworld")]
+    LightNovelWorld(LightNovelWorld),
 }
 
 impl Backends {
@@ -211,6 +221,8 @@ impl Backends {
             Backends::LibRead(_) => LibRead::get_ordering_function(),
             #[cfg(feature = "freewebnovel")]
             Backends::FreeWebNovel(_) => FreeWebNovel::get_ordering_function(),
+            #[cfg(feature = "lightnovelworld")]
+            Backends::LightNovelWorld(_) => LightNovelWorld::get_ordering_function(),
         }
     }
 
@@ -224,6 +236,8 @@ impl Backends {
             Backends::LibRead(_) => Ok(Self::LibRead(LibRead::new(url)?)),
             #[cfg(feature = "freewebnovel")]
             Backends::FreeWebNovel(_) => Ok(Self::FreeWebNovel(FreeWebNovel::new(url)?)),
+            #[cfg(feature = "lightnovelworld")]
+            Backends::LightNovelWorld(_) => Ok(Self::LightNovelWorld(LightNovelWorld::new(url)?)),
         }
     }
 
@@ -238,6 +252,8 @@ impl Backends {
             Backends::LibRead(_) => LibRead::get_backend_regexps(),
             #[cfg(feature = "freewebnovel")]
             Backends::FreeWebNovel(_) => FreeWebNovel::get_backend_regexps(),
+            #[cfg(feature = "lightnovelworld")]
+            Backends::LightNovelWorld(_) => LightNovelWorld::get_backend_regexps(),
         }
     }
 
@@ -251,6 +267,8 @@ impl Backends {
             Backends::LibRead(_) => LibRead::get_backend_name(),
             #[cfg(feature = "freewebnovel")]
             Backends::FreeWebNovel(_) => FreeWebNovel::get_backend_name(),
+            #[cfg(feature = "lightnovelworld")]
+            Backends::LightNovelWorld(_) => LightNovelWorld::get_backend_name(),
         }
     }
 }
@@ -323,6 +341,8 @@ impl Backend for Backends {
             Backends::LibRead(b) => b.title(),
             #[cfg(feature = "freewebnovel")]
             Backends::FreeWebNovel(b) => b.title(),
+            #[cfg(feature = "lightnovelworld")]
+            Backends::LightNovelWorld(b) => b.title(),
         }
     }
 
@@ -338,6 +358,8 @@ impl Backend for Backends {
             Backends::LibRead(b) => b.immutable_identifier(),
             #[cfg(feature = "freewebnovel")]
             Backends::FreeWebNovel(b) => b.immutable_identifier(),
+            #[cfg(feature = "lightnovelworld")]
+            Backends::LightNovelWorld(b) => b.immutable_identifier(),
         }
     }
 
@@ -362,6 +384,8 @@ impl Backend for Backends {
             Backends::LibRead(b) => b.url(),
             #[cfg(feature = "freewebnovel")]
             Backends::FreeWebNovel(b) => b.url(),
+            #[cfg(feature = "lightnovelworld")]
+            Backends::LightNovelWorld(b) => b.url(),
         }
     }
 
@@ -377,6 +401,8 @@ impl Backend for Backends {
             Backends::LibRead(backend) => backend.cover_url(),
             #[cfg(feature = "freewebnovel")]
             Backends::FreeWebNovel(backend) => backend.cover_url(),
+            #[cfg(feature = "lightnovelworld")]
+            Backends::LightNovelWorld(b) => b.cover_url(),
         }
     }
 
@@ -401,6 +427,8 @@ impl Backend for Backends {
             Backends::LibRead(b) => b.get_authors(),
             #[cfg(feature = "freewebnovel")]
             Backends::FreeWebNovel(b) => b.get_authors(),
+            #[cfg(feature = "lightnovelworld")]
+            Backends::LightNovelWorld(b) => b.get_authors(),
         }
     }
 
@@ -415,6 +443,8 @@ impl Backend for Backends {
             Backends::LibRead(b) => b.get_chapter_list(),
             #[cfg(feature = "freewebnovel")]
             Backends::FreeWebNovel(b) => b.get_chapter_list(),
+            #[cfg(feature = "lightnovelworld")]
+            Backends::LightNovelWorld(b) => b.get_chapter_list(),
         }
     }
 
@@ -441,6 +471,8 @@ impl Backend for Backends {
             Backends::LibRead(b) => b.get_chapter(chapter_number),
             #[cfg(feature = "freewebnovel")]
             Backends::FreeWebNovel(b) => b.get_chapter(chapter_number),
+            #[cfg(feature = "lightnovelworld")]
+            Backends::LightNovelWorld(b) => b.get_chapter(chapter_number),
         }
     }
 
@@ -468,6 +500,8 @@ impl Backend for Backends {
             Backends::LibRead(b) => b.get_chapter_count(),
             #[cfg(feature = "freewebnovel")]
             Backends::FreeWebNovel(b) => b.get_chapter_count(),
+            #[cfg(feature = "lightnovelworld")]
+            Backends::LightNovelWorld(b) => b.get_chapter_count(),
         }
     }
 }

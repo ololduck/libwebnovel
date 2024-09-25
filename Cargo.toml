@@ -4,7 +4,7 @@ description = "A Rust crate enabling users to get chapters of a webnovel, with m
 homepage = "https://codeberg.org/paulollivier/libwebnovel"
 repository = "https://codeberg.org/paulollivier/libwebnovel"
 authors = ["Paul Ollivier <contact@paulollivier.fr>"]
-version = "0.8.1"
+version = "0.9.0"
 edition = "2021"
 license = "AGPL-3.0-or-later"
 readme = "README.md"
@@ -34,11 +34,12 @@ path = "src/bin/rr-anti-theft-list-generator.rs"
 required-features = ["helper_scripts", "royalroad"]
 
 [features]
-default = ["royalroad", "freewebnovel"]
-all = ["royalroad", "freewebnovel", "libread"]
+default = ["royalroad", "freewebnovel", "lightnovelworld"]
+all = ["default", "libread"]
 royalroad = ["dep:reqwest", "dep:scraper"]
 freewebnovel = ["dep:reqwest", "dep:scraper"]
 libread = ["freewebnovel"]
+lightnovelworld = ["dep:reqwest", "dep:scraper"]
 helper_scripts = ["dep:diff", "dep:pretty_env_logger"]
 
 [dependencies]
