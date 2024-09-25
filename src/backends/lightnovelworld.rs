@@ -2,6 +2,7 @@ use std::fmt::{Debug, Formatter};
 use std::sync::LazyLock;
 
 use chrono::NaiveDateTime;
+use log::{trace, warn};
 use regex::Regex;
 use scraper::{Html, Selector};
 
@@ -174,21 +175,33 @@ impl Backend for LightNovelWorld {
         loop {
             let page_chapters: Vec<ChapterListElem> = current_page
                 .select(&CHAPTER_LIST_SELECTOR)
-                .map(|sel| {
-                    let chapter_no: usize = sel
+                .filter_map(|sel| {
+                    trace!("sel: {:?}", sel);
+                    let chapter_no_inner_html = sel
                         .select(&CHAPTER_LIST_SELECTOR_CHAPTER_NO)
                         .next()
                         .unwrap()
-                        .inner_html()
-                        .parse()
-                        .unwrap();
+                        .inner_html();
+                    // Need to filter, some chapter are numbered "ex1" for instance, for "extra 1".
+                    let chapter_no: usize = match chapter_no_inner_html.parse().map_err(|e| {
+                        BackendError::ParseError(format!(
+                            "Could not parse \"{}\" as an integer: {e}",
+                            chapter_no_inner_html
+                        ))
+                    }) {
+                        Ok(i) => i,
+                        Err(e) => {
+                            warn!("Could not parse chapter number: {e}");
+                            return None;
+                        }
+                    };
                     let chapter_title = sel
                         .select(&CHAPTER_LIST_SELECTOR_CHAPTER_TITLE)
                         .next()
                         .unwrap()
                         .attr("title")
                         .unwrap();
-                    (chapter_no, chapter_title.to_string())
+                    Some((chapter_no, chapter_title.to_string()))
                 })
                 .collect();
             chapters.extend(page_chapters);
