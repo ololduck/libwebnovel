@@ -5,7 +5,41 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.9.0 (2024-09-25)
+
+### Chore
+
+ - <csr-id-b70182822e4fd25c0343bc69f59735000b1e1ca0/> Update README.md
+ - <csr-id-0064cea55d356a013ad4c44d450f9b7f1f27eb8a/> fix clippy warnings
+
+### New Features
+
+ - <csr-id-4c52b709b0db50c66ff9adf788be56c97cc67177/> add support for lightnovelworld.com
+
+### Commit Statistics
+
+<csr-read-only-do-not-edit/>
+
+ - 3 commits contributed to the release.
+ - 1 day passed between releases.
+ - 3 commits were understood as [conventional](https://www.conventionalcommits.org).
+ - 0 issues like '(#ID)' were seen in commit messages
+
+### Commit Details
+
+<csr-read-only-do-not-edit/>
+
+<details><summary>view details</summary>
+
+ * **Uncategorized**
+    - Update README.md (b701828)
+    - Add support for lightnovelworld.com (4c52b70)
+    - Fix clippy warnings (0064cea)
+</details>
+
 ## v0.8.1 (2024-09-24)
+
+<csr-id-6e242e6296bcf83f31d16b13a80b79cfd107fa9a/>
 
 ### Chore
 
@@ -19,7 +53,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <csr-read-only-do-not-edit/>
 
- - 2 commits contributed to the release.
+ - 3 commits contributed to the release.
  - 2 commits were understood as [conventional](https://www.conventionalcommits.org).
  - 0 issues like '(#ID)' were seen in commit messages
 
@@ -30,6 +64,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <details><summary>view details</summary>
 
  * **Uncategorized**
+    - Release libwebnovel v0.8.1 (41f4ea4)
     - Update README.md (6e242e6)
     - Improve RR anti-theft text removal (3344312)
 </details>
