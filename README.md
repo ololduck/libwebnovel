@@ -53,6 +53,7 @@ want to implement another backend (don't forget to share it with the [main repos
 - [RoyalRoad](https://www.royalroad.com/)
 - [FreeWebNovel](https://freewebnovel.com/)
 - [LibRead](https://libread.com/)
+- [lightnovelworld](https://www.lightnovelworld.com/)
 
 ### Cargo features
 
@@ -106,6 +107,7 @@ request.
   - [x] libread
   - [x] freewebnovel
   - [x] royalroad
+  - [x] lightnovelworld
   - [ ] scribblehub - May be complicated because of cloudflare
   - [ ] suggestions?
 - [ ] implement an `async` version to get a better throughput. May be
