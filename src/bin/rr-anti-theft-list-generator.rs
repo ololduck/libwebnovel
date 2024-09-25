@@ -46,21 +46,18 @@ fn main() -> Result<(), Box<dyn Error>> {
     let reference_chapter = &chapters[0];
     for chapter in &chapters[1..] {
         for diff in diff::lines(&reference_chapter.to_string(), &chapter.to_string()) {
-            match diff {
-                diff::Result::Right(r) => {
-                    if !r.starts_with("<p>") {
-                        continue;
-                    }
-                    let text = r
-                        .strip_prefix("<p>")
-                        .unwrap()
-                        .strip_suffix("</p>")
-                        .unwrap()
-                        .to_string();
-                    info!("found line \"{text}\"");
-                    diffs.push(text)
+            if let diff::Result::Right(r) = diff {
+                if !r.starts_with("<p>") {
+                    continue;
                 }
-                _ => {}
+                let text = r
+                    .strip_prefix("<p>")
+                    .unwrap()
+                    .strip_suffix("</p>")
+                    .unwrap()
+                    .to_string();
+                info!("found line \"{text}\"");
+                diffs.push(text)
             }
         }
     }
@@ -69,15 +66,12 @@ fn main() -> Result<(), Box<dyn Error>> {
     save_known_sentences(&diffs);
     info!("Found {} unique warnings", diffs.len());
     println!(
-        "{}",
-        format!(
-            "const ROYALROAD_ANTI_THEFT_TEXT: &[&str] = &[\n{}\n];",
-            diffs
-                .iter()
-                .map(|s| format!(r#"    "{}""#, s))
-                .collect::<Vec<String>>()
-                .join(",\n")
-        )
+        "const ROYALROAD_ANTI_THEFT_TEXT: &[&str] = &[\n{}\n];",
+        diffs
+            .iter()
+            .map(|s| format!(r#"    "{}""#, s))
+            .collect::<Vec<String>>()
+            .join(",\n")
     );
     Ok(())
 }
