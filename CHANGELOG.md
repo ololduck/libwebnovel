@@ -5,12 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## v0.9.1 (2024-09-25)
+## v0.9.2 (2024-09-26)
 
 ### Bug Fixes
 
- - <csr-id-afe660118e53972b24e850a11bf5c88a7d08cfa3/> exclude "exY" chapters from chapter listing for lightnovelworld
-   Turns out light novel world sometimes has extra chapters name "ex{int}" for extra chapters, such as artworks and others. Filter those out.
+ - <csr-id-99170763f35409dafb60eb34d8748257f538b03e/> decode html entities in all backend's returned titles
 
 ### Commit Statistics
 
@@ -27,6 +26,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <details><summary>view details</summary>
 
  * **Uncategorized**
+    - Decode html entities in all backend's returned titles (9917076)
+</details>
+
+## v0.9.1 (2024-09-25)
+
+### Bug Fixes
+
+ - <csr-id-afe660118e53972b24e850a11bf5c88a7d08cfa3/> exclude "exY" chapters from chapter listing for lightnovelworld
+   Turns out light novel world sometimes has extra chapters name "ex{int}" for extra chapters, such as artworks and others. Filter those out.
+
+### Commit Statistics
+
+<csr-read-only-do-not-edit/>
+
+ - 2 commits contributed to the release.
+ - 1 commit was understood as [conventional](https://www.conventionalcommits.org).
+ - 0 issues like '(#ID)' were seen in commit messages
+
+### Commit Details
+
+<csr-read-only-do-not-edit/>
+
+<details><summary>view details</summary>
+
+ * **Uncategorized**
+    - Release libwebnovel v0.9.1 (09ad5e0)
     - Exclude "exY" chapters from chapter listing for lightnovelworld (afe6601)
 </details>
 
