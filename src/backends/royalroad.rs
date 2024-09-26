@@ -3,6 +3,7 @@ use std::fmt::{Debug, Formatter};
 use std::sync::LazyLock;
 
 use chrono::DateTime;
+use html_escape::decode_html_entities;
 use log::debug;
 use regex::Regex;
 use scraper::{Html, Selector};
@@ -274,7 +275,8 @@ impl Backend for RoyalRoad {
             .select(&CHAPTER_TITLE_SELECTOR)
             .enumerate()
             .map(|(index, elem)| {
-                let title = elem.inner_html().trim_matches('\n').trim().to_string();
+                let title =
+                    decode_html_entities(elem.inner_html().trim_matches('\n').trim()).to_string();
                 (index + 1, title)
             })
             .collect();
@@ -327,19 +329,21 @@ impl Backend for RoyalRoad {
         // A bit of text transformation to get rid of RR's anti-theft added text
         let mut txt = res.text()?;
         for anti_theft_text in ROYALROAD_ANTI_THEFT_TEXT_ARRAY.iter() {
-            txt = txt.replace(anti_theft_text, "").to_string();
+            txt = txt.replace(anti_theft_text, "");
         }
 
         let txt = ROYALROAD_P_REGEX.replace_all(&txt, "<p>").to_string();
 
         let chapter_page = Html::parse_document(&txt);
-        let chapter_title = chapter_page
-            .select(&CHAPTER_PAGE_TITLE_SELECTOR)
-            .next()
-            .unwrap()
-            .inner_html()
-            .trim_matches(&['\n', ' '])
-            .to_string();
+        let chapter_title = decode_html_entities(
+            chapter_page
+                .select(&CHAPTER_PAGE_TITLE_SELECTOR)
+                .next()
+                .unwrap()
+                .inner_html()
+                .trim_matches(&['\n', ' ']),
+        )
+        .to_string();
         let chapter_content = chapter_page
             .select(&CHAPTER_PAGE_CONTENT)
             .next()

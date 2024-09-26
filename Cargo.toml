@@ -4,7 +4,7 @@ description = "A Rust crate enabling users to get chapters of a webnovel, with m
 homepage = "https://codeberg.org/paulollivier/libwebnovel"
 repository = "https://codeberg.org/paulollivier/libwebnovel"
 authors = ["Paul Ollivier <contact@paulollivier.fr>"]
-version = "0.9.1"
+version = "0.9.2"
 edition = "2021"
 license = "AGPL-3.0-or-later"
 readme = "README.md"
@@ -36,10 +36,10 @@ required-features = ["helper_scripts", "royalroad"]
 [features]
 default = ["royalroad", "freewebnovel", "lightnovelworld"]
 all = ["default", "libread"]
-royalroad = ["dep:reqwest", "dep:scraper"]
-freewebnovel = ["dep:reqwest", "dep:scraper"]
+royalroad = ["dep:reqwest", "dep:scraper", "dep:html-escape"]
+freewebnovel = ["dep:reqwest", "dep:scraper", "dep:html-escape"]
 libread = ["freewebnovel"]
-lightnovelworld = ["dep:reqwest", "dep:scraper"]
+lightnovelworld = ["dep:reqwest", "dep:scraper", "dep:html-escape"]
 helper_scripts = ["dep:diff", "dep:pretty_env_logger"]
 
 [dependencies]
@@ -53,6 +53,7 @@ strum = { version = "0.26.3", features = ["derive"] }
 # Backends deps
 reqwest = { version = "0.12.7", features = ["blocking", "gzip"], optional = true }
 scraper = { version = "0.20.0", optional = true }
+html-escape = { version = "0.2.13", optional = true }
 
 # helper scripts deps
 diff = { version = "0.1.13", optional = true }

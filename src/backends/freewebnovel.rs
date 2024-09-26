@@ -1,6 +1,7 @@
 use std::fmt::{Debug, Formatter};
 use std::sync::LazyLock;
 
+use html_escape::decode_html_entities;
 use log::debug;
 use regex::Regex;
 use reqwest::IntoUrl;
@@ -294,11 +295,14 @@ pub(crate) fn get_chapter(url: impl IntoUrl) -> Result<Chapter, BackendError> {
         });
     }
     let page = Html::parse_document(&resp.text()?);
-    let chapter_title = page
-        .select(&CHAPTER_TITLE_SELECTOR)
-        .next()
-        .unwrap()
-        .inner_html();
+    let chapter_title = decode_html_entities(
+        &page
+            .select(&CHAPTER_TITLE_SELECTOR)
+            .next()
+            .unwrap()
+            .inner_html(),
+    )
+    .to_string();
     let chapter_content = page
         .select(&CHAPTER_CONTENT_SELECTOR)
         .next()
@@ -342,7 +346,12 @@ pub(crate) fn get_chapter_list(page: &Html) -> Result<Vec<ChapterListElem>, Back
     Ok(page
         .select(&CHAPTER_LIST_SELECTOR)
         .enumerate()
-        .map(|(index, elem)| (index + 1, elem.attr("title").unwrap().to_string()))
+        .map(|(index, elem)| {
+            (
+                index + 1,
+                decode_html_entities(elem.attr("title").unwrap()).to_string(),
+            )
+        })
         .collect())
 }
 

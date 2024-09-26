@@ -2,6 +2,7 @@ use std::fmt::{Debug, Formatter};
 use std::sync::LazyLock;
 
 use chrono::NaiveDateTime;
+use html_escape::decode_html_entities;
 use log::{trace, warn};
 use regex::Regex;
 use scraper::{Html, Selector};
@@ -195,12 +196,13 @@ impl Backend for LightNovelWorld {
                             return None;
                         }
                     };
-                    let chapter_title = sel
-                        .select(&CHAPTER_LIST_SELECTOR_CHAPTER_TITLE)
-                        .next()
-                        .unwrap()
-                        .attr("title")
-                        .unwrap();
+                    let chapter_title = decode_html_entities(
+                        sel.select(&CHAPTER_LIST_SELECTOR_CHAPTER_TITLE)
+                            .next()
+                            .unwrap()
+                            .attr("title")
+                            .unwrap(),
+                    );
                     Some((chapter_no, chapter_title.to_string()))
                 })
                 .collect();
@@ -229,11 +231,14 @@ impl Backend for LightNovelWorld {
         let url = format!("{}/chapter-{}", self.url, chapter_number);
         let chapter_page = get(&url)?;
         let chapter_content = Html::parse_document(&chapter_page.text()?);
-        let chapter_title = chapter_content
-            .select(&CHAPTER_TITLE_SELECTOR)
-            .next()
-            .unwrap()
-            .inner_html();
+        let chapter_title = decode_html_entities(
+            &chapter_content
+                .select(&CHAPTER_TITLE_SELECTOR)
+                .next()
+                .unwrap()
+                .inner_html(),
+        )
+        .to_string();
         // FIXME: remove ads (<p class="…"> instead of <p>)
         let chapter_paragraphs = chapter_content
             .select(&CHAPTER_CONTENT_SELECTOR)
